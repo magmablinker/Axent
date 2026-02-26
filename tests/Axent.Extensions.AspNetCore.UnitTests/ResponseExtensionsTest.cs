@@ -21,7 +21,7 @@ public sealed class ResponseExtensionsTest
         foreach (var method in errorFactoryMethods)
         {
             var error = (Error)method.Invoke(null, null)!;
-            var response = Response<Unit>.Failure(error);
+            var response = Response.Failure<Unit>(error);
 
             // Act
             var result = response.ToResult();
