@@ -29,13 +29,18 @@ internal sealed class HandlerPipe<TRequest, TResponse> : IHandlerPipe<TRequest, 
         try
         {
             var handler = _serviceProvider.GetService<IRequestHandler<TRequest, TResponse>>();
-            if (handler is null) throw new InvalidOperationException($"No handler found for request type {context.Request.GetType()}");
+            if (handler is null)
+                throw new InvalidOperationException($"No handler found for request type {context.Request.GetType()}");
             return await handler.HandleAsync(context, cancellationToken);
+        }
+        catch (InvalidOperationException)
+        {
+            throw;
         }
         catch (Exception e)
         {
             _logger.LogError(e, "An error occured while processing the request");
-            return Response<TResponse>.Failure(ErrorDefaults.Generic.InternalServerError());
+            return Response.Failure<TResponse>(ErrorDefaults.Generic.InternalServerError());
         }
     }
 }

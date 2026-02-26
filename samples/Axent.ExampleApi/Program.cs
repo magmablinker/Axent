@@ -7,9 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAxent()
-    .AddRequestHandlers(AssemblyProvider.Current);
-
-builder.Services.AddScoped(typeof(IAxentPipe<,>), typeof(ExampleRequestPipe<,>));
+    .AddRequestHandlers(AssemblyProvider.Current)
+    .AddPipe<OtherRequestPipe>()
+    .AddPipe(typeof(ExampleRequestPipe<,>));
 
 var app = builder.Build();
 
@@ -20,6 +20,17 @@ app.MapGet("/api/example", async (ISender sender, CancellationToken cancellation
     var request = new ExampleRequest
     {
         Message = "Hello World!"
+    };
+
+    var response = await sender.SendAsync(request, cancellationToken);
+    return response.ToResult();
+});
+
+app.MapGet("/api/other", async (ISender sender, CancellationToken cancellationToken) =>
+{
+    var request = new OtherRequest
+    {
+        Message = "I'm Another Request"
     };
 
     var response = await sender.SendAsync(request, cancellationToken);

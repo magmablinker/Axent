@@ -23,8 +23,8 @@
 ## Getting started
 ### 1. Install Packages
 ```shell
-dotnet add package Axent.Core --version 0.0.1
-dotnet add package Axent.Extensions.AspNetCore --version 0.0.1
+dotnet add package Axent.Core --version 1.0.1
+dotnet add package Axent.Extensions.AspNetCore --version 1.0.1
 ```
 
 ### 2. Register Services
@@ -59,7 +59,7 @@ internal sealed class ExampleRequestHandler : RequestHandler<ExampleRequest, Uni
     public override Task<Response<Unit>> HandleAsync(RequestContext<ExampleRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Message from request '{0}'", context.Request.Message);
-        return Task.FromResult(Response<Unit>.Success(Unit.Value));
+        return Task.FromResult(Response.Success(Unit.Value));
     }
 }
 ```
@@ -80,7 +80,7 @@ app.MapGet("/api/example", async (ISender sender, CancellationToken cancellation
 
 ## Pipelines
 Axent allows you to add custom processors to your request pipeline by implementing `IAxentPipe<TRequest, TResponse>`. This is useful for logging, validation, metrics, or any cross-cutting concerns.
-### Example Pipe
+### Example Generic Pipe
 ```csharp
 internal sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TRequest, TResponse>
 {
@@ -97,8 +97,37 @@ internal sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TRequ
         return next();
     }
 }
+
+builder.Services.AddAxent()
+    .AddRequestHandlers(AssemblyProvider.Current)
+    .AddPipe(typeof(ExampleRequestPipe<,>));
 ```
 > This pipe executes for every request handled by Axent.
+
+### Example Specific Pipe
+```csharp
+internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, Unit>
+{
+    private readonly ILogger<OtherRequestPipe> _logger;
+
+    public OtherRequestPipe(ILogger<OtherRequestPipe> logger)
+    {
+        _logger = logger;
+    }
+
+
+    public ValueTask<Response<Unit>> ProcessAsync(Func<ValueTask<Response<Unit>>> next, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("I only run during other request");
+        return next();
+    }
+}
+
+builder.Services.AddAxent()
+    .AddRequestHandlers(AssemblyProvider.Current)
+    .AddPipe<OtherRequestPipe>();
+```
+> This pipe executes for every request of the type `OtherRequest`
 
 ## Contributing
 Contributions are welcome! Please open an issue or pull request for bug fixes, improvements, or new features.

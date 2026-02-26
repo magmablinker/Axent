@@ -35,4 +35,27 @@ public static class ServiceCollectionExtensions
 
         return builder;
     }
+
+    public static AxentBuilder AddPipe<TPipe>(this AxentBuilder builder) where TPipe : IAxentPipe
+    {
+        var pipeType = typeof(TPipe);
+        return builder.AddPipe(pipeType);
+    }
+
+    public static AxentBuilder AddPipe(this AxentBuilder builder, Type pipeType)
+    {
+        if (pipeType.IsGenericTypeDefinition)
+        {
+            builder.Services.AddScoped(typeof(IAxentPipe<,>), pipeType);
+            return builder;
+        }
+
+        var serviceType = pipeType
+                              .GetInterfaces()
+                              .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAxentPipe<,>))
+                          ?? throw new InvalidOperationException($"{pipeType.Name} does not implement IAxentPipe<,>");
+
+        builder.Services.AddScoped(serviceType, pipeType);
+        return builder;
+    }
 }
