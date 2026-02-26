@@ -80,7 +80,7 @@ app.MapGet("/api/example", async (ISender sender, CancellationToken cancellation
 
 ## Pipelines
 Axent allows you to add custom processors to your request pipeline by implementing `IAxentPipe<TRequest, TResponse>`. This is useful for logging, validation, metrics, or any cross-cutting concerns.
-### Example Generic Pipe
+### Generic Pipe
 ```csharp
 internal sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TRequest, TResponse>
 {
@@ -104,7 +104,7 @@ builder.Services.AddAxent()
 ```
 > This pipe executes for every request handled by Axent.
 
-### Example Specific Pipe
+### Specific Pipe
 ```csharp
 internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, Unit>
 {
