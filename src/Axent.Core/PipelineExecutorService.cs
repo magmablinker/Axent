@@ -2,13 +2,6 @@
 
 namespace Axent.Core;
 
-internal interface IPipelineExecutorService
-{
-    ValueTask<Response<TResponse>> ExecuteAsync<TRequest, TResponse>(IEnumerable<IAxentPipe<TRequest, TResponse>> pipes,
-        RequestContext<TRequest> request,
-        CancellationToken cancellationToken = default);
-}
-
 internal sealed class PipelineExecutorService : IPipelineExecutorService
 {
     public async ValueTask<Response<TResponse>> ExecuteAsync<TRequest, TResponse>(IEnumerable<IAxentPipe<TRequest, TResponse>> pipes,

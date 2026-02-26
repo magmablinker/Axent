@@ -3,11 +3,6 @@ using Axent.Abstractions;
 
 namespace Axent.Core;
 
-internal interface IRequestContextFactory
-{
-    RequestContext<TRequest> Get<TRequest>(TRequest request);
-}
-
 internal sealed class RequestContextFactory : IRequestContextFactory
 {
     private readonly IHttpContextAccessor _httpContextAccessor;

@@ -8,11 +8,13 @@ public static class ServiceCollectionExtensions
 {
     public static AxentBuilder AddAxent(this IServiceCollection services)
     {
-        services.AddScoped<ISender, Sender>()
-            .AddScoped<IRequestContextFactory, RequestContextFactory>()
+        var builder = new AxentBuilder(services);
+
+        builder.Services.AddScoped<IRequestContextFactory, RequestContextFactory>()
             .AddScoped<IPipelineExecutorService, PipelineExecutorService>()
             .AddScoped(typeof(IHandlerPipe<,>), typeof(HandlerPipe<,>));
-        return new(services);
+        
+        return builder;
     }
     
     public static AxentBuilder AddRequestHandlers(this AxentBuilder builder, Assembly assembly)

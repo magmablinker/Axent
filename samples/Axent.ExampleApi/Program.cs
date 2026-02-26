@@ -2,11 +2,13 @@ using Axent.Abstractions;
 using Axent.Core;
 using Axent.ExampleApi;
 using Axent.Extensions.AspNetCore;
+using Axent.Generated;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAxent()
+    .AddSender()
     .AddRequestHandlers(AssemblyProvider.Current)
     .AddPipe<OtherRequestPipe>()
     .AddPipe(typeof(ExampleRequestPipe<,>));

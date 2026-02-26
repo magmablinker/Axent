@@ -31,6 +31,7 @@ dotnet add package Axent.Extensions.AspNetCore --version 1.0.1
 ```csharp
 builder.Services.AddHttpContextAccessor()
 builder.Services.AddAxent()
+    .AddSender()
     .AddRequestHandlers(AssemblyProvider.Current);
 ```
 
