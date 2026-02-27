@@ -14,6 +14,7 @@
 - Extensible pipelines using `IAxentPipe<TRequest, TResponse>`
 - Optimized for performance and simplicity
 - Works seamlessly with ASP.NET Core
+- Choose between a source generated or reflection based sender implementation
 
 ---
 
@@ -128,6 +129,34 @@ builder.Services.AddAxent()
     .AddPipe<OtherRequestPipe>();
 ```
 > This pipe executes for every request of the type `OtherRequest`
+
+## Options
+
+### `AxentOptions`
+
+AxentOptions allows you to configure optional settings that modify the behavior of the Axent library.
+
+```csharp
+public sealed class AxentOptions
+{
+    /// <summary>
+    /// Determines whether to use the source-generated sender implementation.
+    /// Defaults to true.
+    /// </summary>
+    public bool UseSourceGeneratedSender { get; set; } = true;
+}
+```
+
+### Using Reflection Based Sender Implementation
+
+You can switch to the reflection-based sender by setting UseSourceGeneratedSender to false:
+
+```csharp
+builder.Services.AddAxent(o => o.UseSourceGeneratedSender = false)
+    .AddRequestHandlers(AssemblyProvider.Current)
+    .AddPipe<OtherRequestPipe>();
+```
+> By default, if no options are provided, the source-generated sender is used.
 
 ## Contributing
 Contributions are welcome! Please open an issue or pull request for bug fixes, improvements, or new features.

@@ -1,14 +1,19 @@
-﻿using Axent.Abstractions;
+using Axent.Abstractions;
 using Axent.Core;
 
 namespace Axent.ExampleApi;
 
-internal sealed class OtherRequest : IRequest<Unit>
+internal sealed class OtherRequest : IRequest<OtherResponse>
 {
     public required string Message { get; init; }
 }
 
-internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, Unit>
+internal sealed class OtherResponse
+{
+    public required string Message { get; init; }
+}
+
+internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, OtherResponse>
 {
     private readonly ILogger<OtherRequestPipe> _logger;
 
@@ -18,14 +23,14 @@ internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, Unit>
     }
 
 
-    public ValueTask<Response<Unit>> ProcessAsync(Func<ValueTask<Response<Unit>>> next, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<OtherResponse>> ProcessAsync(Func<ValueTask<Response<OtherResponse>>> next, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("I only run during other request");
         return next();
     }
 }
 
-internal sealed class OtherRequestHandler : RequestHandler<OtherRequest, Unit>
+internal sealed class OtherRequestHandler : RequestHandler<OtherRequest, OtherResponse>
 {
     private readonly ILogger<OtherRequestHandler> _logger;
 
@@ -34,9 +39,9 @@ internal sealed class OtherRequestHandler : RequestHandler<OtherRequest, Unit>
         _logger = logger;
     }
 
-    public override Task<Response<Unit>> HandleAsync(RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
+    public override Task<Response<OtherResponse>> HandleAsync(RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Message from request '{0}'", context.Request.Message);
-        return Task.FromResult(Response.Success(Unit.Value));
+        return Task.FromResult(Response.Success(new OtherResponse { Message = context.Request.Message }));
     }
 }

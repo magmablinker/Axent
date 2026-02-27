@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,14 +9,19 @@ namespace Axent.SourceGenerator;
 [Generator]
 public sealed class SenderGenerator : IIncrementalGenerator
 {
+    private const string AxentModuleInitializer = "AxentModuleInitializer.g.cs";
+    private const string Sender = "Sender.g.cs";
+
     private const string RequestMetadataName = "Axent.Abstractions.IRequest`1";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var requestInterfaceSymbol =
-            context.CompilationProvider.Select(
-                static (compilation, _) =>
-                    compilation.GetTypeByMetadataName(RequestMetadataName));
+        context.RegisterPostInitializationOutput(static ctx =>
+        {
+            ctx.AddSource(
+                AxentModuleInitializer,
+                SourceText.From(BuildModuleInitializerSource(), Encoding.UTF8));
+        });
 
         var requestTypes =
             context.SyntaxProvider
@@ -24,10 +29,7 @@ public sealed class SenderGenerator : IIncrementalGenerator
                     predicate: static (node, _) => IsCandidate(node),
                     transform: static (ctx, ct) => GetRequestInfo(ctx, ct))
                 .Where(static info => info is not null)
-                .Combine(requestInterfaceSymbol)
-                .Select(static (pair, _) =>
-                    TryMatchRequest(pair.Left!, pair.Right))
-                .Where(static info => info is not null)
+                .WithComparer(RequestTypeInfo.Comparer)
                 .Collect();
 
         context.RegisterSourceOutput(
@@ -36,52 +38,45 @@ public sealed class SenderGenerator : IIncrementalGenerator
     }
 
     private static bool IsCandidate(SyntaxNode node)
-    {
-        return node is ClassDeclarationSyntax { BaseList.Types.Count: > 0 };
-    }
+        => node is ClassDeclarationSyntax { BaseList.Types.Count: > 0 };
 
-    private static INamedTypeSymbol? GetRequestInfo(
+    private static RequestTypeInfo? GetRequestInfo(
         GeneratorSyntaxContext ctx,
         CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
-        var symbol =
-            ctx.SemanticModel.GetDeclaredSymbol(ctx.Node, ct)
-                as INamedTypeSymbol;
-
-        if (symbol is null)
+        if (ctx.SemanticModel.GetDeclaredSymbol(ctx.Node, ct) is not INamedTypeSymbol symbol
+            || symbol.IsAbstract
+            || symbol.IsStatic)
+        {
             return null;
+        }
 
-        if (symbol.IsAbstract || symbol.IsStatic)
-            return null;
+        var requestInterface =
+            ctx.SemanticModel.Compilation.GetTypeByMetadataName(RequestMetadataName);
 
-        return symbol;
-    }
-
-    private static RequestTypeInfo? TryMatchRequest(
-        INamedTypeSymbol type,
-        INamedTypeSymbol? requestInterface)
-    {
         if (requestInterface is null)
+        {
             return null;
+        }
 
-        foreach (var symbol in type.AllInterfaces)
+        foreach (var iface in symbol.AllInterfaces)
         {
             if (!SymbolEqualityComparer.Default.Equals(
-                    symbol.OriginalDefinition,
+                    iface.OriginalDefinition,
                     requestInterface))
+            {
                 continue;
+            }
 
-            var responseType = symbol.TypeArguments[0];
+            var responseType = iface.TypeArguments[0];
 
             return new RequestTypeInfo(
                 RequestFullName:
-                    type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+                    symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 ResponseFullName:
-                    responseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                RequestNamespace:
-                    type.ContainingNamespace.ToDisplayString());
+                    responseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat));
         }
 
         return null;
@@ -99,89 +94,115 @@ public sealed class SenderGenerator : IIncrementalGenerator
                 .ToImmutableArray();
 
         if (requests.Length == 0)
+        {
             return;
+        }
 
-        var source = BuildSource(requests);
         ctx.AddSource(
-            "Sender.Dispatch.g.cs",
-            SourceText.From(source, Encoding.UTF8));
+            Sender,
+            SourceText.From(BuildSenderSource(requests), Encoding.UTF8));
     }
 
-    private static string BuildSource(
-        ImmutableArray<RequestTypeInfo> types)
+    private static string BuildSenderSource(ImmutableArray<RequestTypeInfo> types)
     {
-        var sb = new StringBuilder();
+        var sb = new StringBuilder(types.Length * 200); // preallocate
 
-        sb.AppendLine("// <auto-generated />");
-        sb.AppendLine("#nullable enable");
-        sb.AppendLine();
-        sb.AppendLine("using System;");
-        sb.AppendLine("using System.Threading;");
-        sb.AppendLine("using System.Threading.Tasks;");
-        sb.AppendLine("using Axent.Abstractions;");
-        sb.AppendLine("using Microsoft.Extensions.DependencyInjection;");
-        sb.AppendLine();
-        sb.AppendLine("namespace Axent.Generated;");
-        sb.AppendLine();
-        sb.AppendLine("internal sealed class Sender : global::Axent.Abstractions.ISender");
-        sb.AppendLine("{");
-        sb.AppendLine("    private readonly global::System.IServiceProvider _serviceProvider;");
-        sb.AppendLine("    private readonly global::Axent.Abstractions.IRequestContextFactory _requestContextFactory;");
-        sb.AppendLine();
-        sb.AppendLine("    public Sender(");
-        sb.AppendLine("        global::System.IServiceProvider serviceProvider,");
-        sb.AppendLine("        global::Axent.Abstractions.IRequestContextFactory requestContextFactory)");
-        sb.AppendLine("    {");
-        sb.AppendLine("        _serviceProvider = serviceProvider;");
-        sb.AppendLine("        _requestContextFactory = requestContextFactory;");
-        sb.AppendLine("    }");
-        sb.AppendLine();
-        sb.AppendLine("    public global::System.Threading.Tasks.Task<global::Axent.Abstractions.Response<TResponse>>");
-        sb.AppendLine("        SendAsync<TResponse>(");
-        sb.AppendLine("            global::Axent.Abstractions.IRequest<TResponse> request,");
-        sb.AppendLine("            global::System.Threading.CancellationToken cancellationToken)");
-        sb.AppendLine("    {");
-        sb.AppendLine("        return request switch");
-        sb.AppendLine("        {");
+        sb.AppendLine("""
+            // <auto-generated />
+            #nullable enable
+            using System;
+            using System.Collections.Generic;
+            using System.Threading;
+            using System.Threading.Tasks;
+            using Axent.Abstractions;
+            using Microsoft.Extensions.DependencyInjection;
+
+            namespace Axent.Generated;
+
+            internal sealed class GeneratedSender : ISender
+            {
+                private readonly IServiceProvider _serviceProvider;
+                private readonly IRequestContextFactory _requestContextFactory;
+
+                private static readonly Dictionary<Type, Func<GeneratedSender, object, CancellationToken, Task<object>>> _dispatchers;
+
+                static GeneratedSender()
+                {
+                    _dispatchers = new Dictionary<Type, Func<GeneratedSender, object, CancellationToken, Task<object>>>
+                    {
+            """);
 
         foreach (var type in types)
         {
             sb.AppendLine(
-                $"            {type.RequestFullName} r => " +
-                $"(global::System.Threading.Tasks.Task<global::Axent.Abstractions.Response<TResponse>>)" +
-                $"(object)SendInternalAsync<{type.RequestFullName}, {type.ResponseFullName}>(r, cancellationToken),");
+                $"          [typeof({type.RequestFullName})] = (s, r, ct) => s.SendInternalAsync<{type.RequestFullName}, {type.ResponseFullName}>(({type.RequestFullName})r, ct),");
         }
 
-        sb.AppendLine("            _ => throw new global::System.InvalidOperationException(");
-        sb.AppendLine("                     $\"No sender found for request type '{request.GetType().FullName}'.\")");
-        sb.AppendLine("        };");
-        sb.AppendLine("    }");
-        sb.AppendLine();
-        sb.AppendLine("    private async global::System.Threading.Tasks.Task<global::Axent.Abstractions.Response<TResponse>>");
-        sb.AppendLine("        SendInternalAsync<TRequest, TResponse>(");
-        sb.AppendLine("            TRequest request,");
-        sb.AppendLine("            global::System.Threading.CancellationToken cancellationToken)");
-        sb.AppendLine("        where TRequest : class, global::Axent.Abstractions.IRequest<TResponse>");
-        sb.AppendLine("    {");
-        sb.AppendLine("        var executor = _serviceProvider.GetRequiredService<global::Axent.Abstractions.IPipelineExecutorService>();");
-        sb.AppendLine("        var pipes = _serviceProvider.GetServices<global::Axent.Abstractions.IAxentPipe<TRequest, TResponse>>();");
-        sb.AppendLine("        var handlerPipe = _serviceProvider.GetRequiredService<global::Axent.Abstractions.IHandlerPipe<TRequest, TResponse>>();");
-        sb.AppendLine("        var context = _requestContextFactory.Get(request);");
-        sb.AppendLine();
-        sb.AppendLine("        return await executor.ExecuteAsync([..pipes, handlerPipe], context, cancellationToken);");
-        sb.AppendLine("    }");
-        sb.AppendLine("}");
-        sb.AppendLine();
-        sb.AppendLine("public static class AxentBuilderExtensions");
-        sb.AppendLine("{");
-        sb.AppendLine("    public static global::Axent.Core.AxentBuilder AddSender(");
-        sb.AppendLine("        this global::Axent.Core.AxentBuilder builder)");
-        sb.AppendLine("    {");
-        sb.AppendLine("        builder.Services.AddScoped<global::Axent.Abstractions.ISender, Axent.Generated.Sender>();");
-        sb.AppendLine("        return builder;");
-        sb.AppendLine("    }");
-        sb.AppendLine("}");
+        sb.AppendLine("""
+                    };
+                }
+
+                public GeneratedSender(IServiceProvider serviceProvider, IRequestContextFactory requestContextFactory)
+                {
+                    _serviceProvider = serviceProvider;
+                    _requestContextFactory = requestContextFactory;
+                }
+
+                public async Task<Response<TResponse>> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken)
+                {
+                    if (_dispatchers.TryGetValue(request.GetType(), out var handler))
+                    {
+                        var result = await handler(this, request, cancellationToken);
+                        return (Response<TResponse>)result;
+                    }
+
+                    throw new InvalidOperationException($"No sender found for request type '{request.GetType().FullName}'.");
+                }
+
+                private async Task<object> SendInternalAsync<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken)
+                    where TRequest : class, IRequest<TResponse>
+                {
+                    var executor = _serviceProvider.GetRequiredService<IPipelineExecutorService>();
+                    var pipes = _serviceProvider.GetServices<IAxentPipe<TRequest, TResponse>>();
+                    var handlerPipe = _serviceProvider.GetRequiredService<IHandlerPipe<TRequest, TResponse>>();
+                    var context = _requestContextFactory.Get(request);
+                    return await executor.ExecuteAsync([.. pipes, handlerPipe], context, cancellationToken);    }
+                }
+            """);
 
         return sb.ToString();
     }
+
+    private static string BuildModuleInitializerSource() =>
+        """
+        // <auto-generated />
+        #nullable enable
+
+        using System.Runtime.CompilerServices;
+        using Axent.Abstractions;
+        using Axent.Core;
+        using Microsoft.Extensions.DependencyInjection;
+
+        namespace Axent.Generated;
+
+        internal static class SenderModuleInitializer
+        {
+            [ModuleInitializer]
+            internal static void Register()
+            {
+                AxentSenderRegistry.Register(static sp =>
+                    new GeneratedSender(
+                        sp,
+                        sp.GetRequiredService<IRequestContextFactory>()));
+            }
+        }
+        """;
+}
+
+internal sealed record RequestTypeInfo(
+    string RequestFullName,
+    string ResponseFullName)
+{
+    public static readonly IEqualityComparer<RequestTypeInfo?> Comparer =
+        EqualityComparer<RequestTypeInfo?>.Default;
 }
