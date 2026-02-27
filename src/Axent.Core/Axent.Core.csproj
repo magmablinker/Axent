@@ -5,25 +5,18 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Axent.Abstractions\Axent.Abstractions.csproj" />
-		<ProjectReference
-			Include="..\Axent.SourceGenerator\Axent.SourceGenerator.csproj"
-			ReferenceOutputAssembly="false"
-			PrivateAssets="all" />
+		<ProjectReference Include="..\Axent.SourceGenerator\Axent.SourceGenerator.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
 	</ItemGroup>
 
 	<Target Name="PackGenerator" BeforeTargets="_GetPackageFiles">
 		<ItemGroup>
-			<None
-				Include="$(MSBuildThisFileDirectory)..\Axent.SourceGenerator\bin\$(Configuration)\netstandard2.0\Axent.SourceGenerator.dll"
-				Pack="true"
-				PackagePath="analyzers/dotnet/cs/Axent.SourceGenerator.dll"
-				Visible="false" />
+			<None Include="$(MSBuildThisFileDirectory)..\Axent.SourceGenerator\bin\$(Configuration)\netstandard2.0\Axent.SourceGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs/Axent.SourceGenerator.dll" Visible="false" />
 		</ItemGroup>
 	</Target>
 </Project>

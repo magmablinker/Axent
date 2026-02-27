@@ -4,7 +4,7 @@ using Axent.Abstractions;
 
 namespace Axent.Core;
 
-public static class ServiceCollectionExtensions
+public static class AxentServiceRegistration
 {
     public static AxentBuilder AddAxent(this IServiceCollection services)
     {
@@ -13,10 +13,12 @@ public static class ServiceCollectionExtensions
         builder.Services.AddScoped<IRequestContextFactory, RequestContextFactory>()
             .AddScoped<IPipelineExecutorService, PipelineExecutorService>()
             .AddScoped(typeof(IHandlerPipe<,>), typeof(HandlerPipe<,>));
-        
+
+        TryAddGeneratedSender(services);
+
         return builder;
     }
-    
+
     public static AxentBuilder AddRequestHandlers(this AxentBuilder builder, Assembly assembly)
     {
         var handlerTypes = assembly.GetTypes()
@@ -54,10 +56,30 @@ public static class ServiceCollectionExtensions
 
         var serviceType = pipeType
                               .GetInterfaces()
-                              .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAxentPipe<,>))
+                              .FirstOrDefault(i =>
+                                  i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IAxentPipe<,>))
                           ?? throw new InvalidOperationException($"{pipeType.Name} does not implement IAxentPipe<,>");
 
         builder.Services.AddScoped(serviceType, pipeType);
         return builder;
+    }
+
+    private static void TryAddGeneratedSender(IServiceCollection services)
+    {
+        var senderType =
+            AppDomain.CurrentDomain
+                .GetAssemblies()
+                .SelectMany(a => a.GetTypes())
+                .FirstOrDefault(t =>
+                    typeof(ISender).IsAssignableFrom(t) &&
+                    t.Name == "Sender" &&
+                    t.Namespace == "Axent.Generated");
+
+        if (senderType is null)
+        {
+            throw new AxentConfigurationException("Unable to find source generated sender type");
+        }
+
+        services.AddScoped(typeof(ISender), senderType);
     }
 }
