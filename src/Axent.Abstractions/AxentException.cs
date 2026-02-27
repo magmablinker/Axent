@@ -1,3 +1,3 @@
-﻿namespace Axent.Abstractions;
+namespace Axent.Abstractions;
 
-public class AxentException(string message) : Exception(message);
+public abstract class AxentException(string message) : Exception(message);
