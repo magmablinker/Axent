@@ -4,7 +4,6 @@ using Axent.ExampleApi;
 using Axent.Extensions.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAxent()
     .AddRequestHandlers(AssemblyProvider.Current)

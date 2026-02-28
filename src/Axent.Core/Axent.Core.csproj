@@ -5,7 +5,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Axent.Abstractions\Axent.Abstractions.csproj" />
-		<ProjectReference Include="..\Axent.Generators\Axent.Generators.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
+		<ProjectReference Include="..\Axent.Generators\Axent.Generators.csproj" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -1,7 +1,9 @@
 # Axent
+
 [![NuGet](https://img.shields.io/nuget/v/Axent.Abstractions?label=Axent.Abstractions)](https://www.nuget.org/packages/Axent.Abstractions)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Core?label=Axent.Core)](https://www.nuget.org/packages/Axent.Core)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Extensions.AspNetCore?label=Axent.Extensions.AspNetCore)](https://www.nuget.org/packages/Axent.Extensions.AspNetCore)
+[![Downloads](https://img.shields.io/nuget/dt/Axent.Core.svg)](https://www.nuget.org/packages/Axent.Core/)
 [![License](https://img.shields.io/badge/license-APACHE-blue)](LICENSE)
 
 **Axent** is a lightweight, high-performance .NET library for implementing CQRS patterns with minimal boilerplate. It provides a simple request/response pipeline and allows adding custom processors for advanced scenarios.
@@ -91,7 +93,7 @@ internal sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TRequ
     {
         _logger = logger;
     }
-    
+
     public ValueTask<Response<TResponse>> ProcessAsync(Func<ValueTask<Response<TResponse>>> next, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("This pipe runs during every request.");
@@ -161,5 +163,5 @@ builder.Services.AddAxent(o => o.UseSourceGeneratedSender = false)
 ## Contributing
 Contributions are welcome! Please open an issue or pull request for bug fixes, improvements, or new features.
 
-## License 
+## License
 This project is licensed under the Apache License.

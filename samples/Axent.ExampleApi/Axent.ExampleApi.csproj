@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <IsPackable>false</IsPackable>
-	<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	  <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Axent.Abstractions\Axent.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Axent.Core\Axent.Core.csproj" />

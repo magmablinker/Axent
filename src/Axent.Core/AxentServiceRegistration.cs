@@ -51,6 +51,24 @@ public static class AxentServiceRegistration
         return builder;
     }
 
+    public static AxentBuilder AddHandler<THandler>(this AxentBuilder builder)
+        where THandler : class, IRequestHandler
+    {
+        var handlerType = typeof(THandler);
+
+        var serviceType = handlerType
+                              .GetInterfaces()
+                              .FirstOrDefault(i =>
+                                  i.IsGenericType &&
+                                  i.GetGenericTypeDefinition() == typeof(IRequestHandler<,>))
+                          ?? throw new AxentConfigurationException(
+                              $"'{handlerType.Name}' does not implement IRequestHandler<TRequest, TResponse>.");
+
+        builder.Services.AddScoped(serviceType, handlerType);
+
+        return builder;
+    }
+
     public static AxentBuilder AddPipe<TPipe>(this AxentBuilder builder)
         where TPipe : IAxentPipe
         => builder.AddPipe(typeof(TPipe));

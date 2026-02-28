@@ -11,11 +11,15 @@ namespace Axent.Generated;
 
 internal sealed class Sender : ISender
 {
-    private readonly IServiceProvider _serviceProvider;
+    {{- for type in types }}
+    private readonly {{ type.symbol_name }}Pipeline _{{ type.symbol_name }}Pipeline;
+    {{- end }}
 
     public Sender(IServiceProvider serviceProvider)
     {
-        _serviceProvider = serviceProvider;
+        {{- for type in types }}
+        _{{ type.symbol_name }}Pipeline = serviceProvider.GetRequiredService<{{ type.symbol_name }}Pipeline>();
+        {{- end }}
     }
 
     public Task<Response<TResponse>> SendAsync<TResponse>(
@@ -24,11 +28,11 @@ internal sealed class Sender : ISender
     {
         return request switch
         {
-        {{ for type in types }}
-            {{ type.request_full_name }} r => (Task<Response<TResponse>>)(object)_serviceProvider.GetRequiredService<{{ type.symbol_name }}Pipeline>().ExecuteAsync(r, cancellationToken),
-        {{ end }}
+            {{- for type in types }}
+            {{ type.request_full_name }} r => (Task<Response<TResponse>>)(object)_{{ type.symbol_name }}Pipeline.ExecuteAsync(r, cancellationToken),
+            {{- end }}
             _ => throw new InvalidOperationException(
-                        $"No pipeline found for request type '{request.GetType().FullName}'.")
+                $"No pipeline found for request type '{request.GetType().FullName}'.")
         };
     }
 }
