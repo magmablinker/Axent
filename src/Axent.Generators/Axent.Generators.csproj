@@ -11,6 +11,7 @@
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
     <IsPackable>false</IsPackable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,7 +26,9 @@
 	  </PackageReference>
 	  <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" PrivateAssets="all" />
 	  <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
-    <PackageReference Include="Scriban" Version="6.5.3" PrivateAssets="all" GeneratePathProperty="true" />
+    <PackageReference Include="Scriban" Version="6.5.3" PrivateAssets="all"
+                      GeneratePathProperty="true"
+                      CopyLocal="true" />
   </ItemGroup>
 
   <ItemGroup>
