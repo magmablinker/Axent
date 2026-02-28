@@ -1,0 +1,15 @@
+<svg width="620" height="160" viewBox="0 0 620 160" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon -->
+  <g transform="translate(20,20)">
+    <!-- Hexagon outline -->
+    <polygon points="60,0 120,35 120,105 60,140 0,105 0,35" fill="none" stroke="#000" stroke-width="6" stroke-linejoin="miter"></polygon>
+
+    <!-- Abstract A shape -->
+    <polygon points="60,28 92,98 78,98 60,58 42,98 28,98" fill="#000"></polygon>
+  </g>
+
+  <!-- Centered Text -->
+  <text x="165" y="95" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="64" font-weight="600" fill="#000" letter-spacing="1" dominant-baseline="middle">
+    Axent
+  </text>
+</svg>

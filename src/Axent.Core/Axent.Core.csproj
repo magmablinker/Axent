@@ -5,7 +5,10 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Axent.Abstractions\Axent.Abstractions.csproj" />
-		<ProjectReference Include="..\Axent.Generators\Axent.Generators.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Axent.Generators\Axent.Generators.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false"
+                      PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -14,9 +17,9 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
 	</ItemGroup>
 
-	<Target Name="PackGenerator" BeforeTargets="_GetPackageFiles">
-		<ItemGroup>
-			<None Include="$(MSBuildThisFileDirectory)..\Axent.Generators\bin\$(Configuration)\netstandard2.0\Axent.Generators.dll" Pack="true" PackagePath="analyzers/dotnet/cs/Axent.Generators.dll" Visible="false" />
-		</ItemGroup>
-	</Target>
+<!--	<Target Name="PackGenerator" BeforeTargets="_GetPackageFiles">-->
+<!--		<ItemGroup>-->
+<!--			<None Include="$(MSBuildThisFileDirectory)..\Axent.Generators\bin\$(Configuration)\netstandard2.0\Axent.Generators.dll" Pack="true" PackagePath="analyzers/dotnet/cs/Axent.Generators.dll" Visible="false" />-->
+<!--		</ItemGroup>-->
+<!--	</Target>-->
 </Project>

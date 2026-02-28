@@ -3,10 +3,10 @@ using Axent.Core;
 
 namespace Axent.Benchmark;
 
-public record PingRequest(string Message) : IRequest<PingResponse>;
-public record PingResponse(string Reply);
+public sealed record PingRequest(string Message) : IRequest<PingResponse>;
+public sealed record PingResponse(string Reply);
 
-public class PingHandler : RequestHandler<PingRequest, PingResponse>
+internal sealed class PingHandler : RequestHandler<PingRequest, PingResponse>
 {
     public override Task<Response<PingResponse>> HandleAsync(RequestContext<PingRequest> context, CancellationToken cancellationToken = default)
     {

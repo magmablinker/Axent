@@ -1,5 +1,16 @@
 # Axent
 
+<svg width="620" height="160" viewBox="0 0 620 164" xmlns="http://www.w3.org/2000/svg" style="padding-bottom: 20px; background: white;">
+  <g transform="translate(20,20)">
+    <polygon points="60,0 120,35 120,105 60,140 0,105 0,35" fill="none" stroke="#000" stroke-width="6" stroke-linejoin="miter"></polygon>
+    <polygon points="60,28 92,98 78,98 60,58 42,98 28,98" fill="#000"></polygon>
+  </g>
+
+  <text x="165" y="95" font-family="Segoe UI, Inter, Arial, sans-serif" font-size="64" font-weight="600" fill="#000" letter-spacing="1" dominant-baseline="middle">
+    Axent
+  </text>
+</svg>
+
 [![NuGet](https://img.shields.io/nuget/v/Axent.Abstractions?label=Axent.Abstractions)](https://www.nuget.org/packages/Axent.Abstractions)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Core?label=Axent.Core)](https://www.nuget.org/packages/Axent.Core)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Extensions.AspNetCore?label=Axent.Extensions.AspNetCore)](https://www.nuget.org/packages/Axent.Extensions.AspNetCore)

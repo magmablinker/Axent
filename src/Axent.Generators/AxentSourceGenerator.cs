@@ -36,7 +36,7 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
     }
 
     private static bool IsCandidate(SyntaxNode node)
-        => node is ClassDeclarationSyntax { BaseList.Types.Count: > 0 };
+        => node is (ClassDeclarationSyntax or RecordDeclarationSyntax) and TypeDeclarationSyntax { BaseList.Types.Count: > 0 };
 
     private static RequestTypeInfo? GetRequestInfo(
         GeneratorSyntaxContext ctx,
