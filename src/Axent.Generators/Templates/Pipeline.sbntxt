@@ -11,7 +11,6 @@ namespace Axent.Generated;
 
 {{ for type in types }}
 internal sealed class {{ type.symbol_name }}Pipeline
-    : IPipelineChain<{{ type.request_full_name }}, {{ type.response_full_name }}>
 {
     private readonly IRequestContextFactory _contextFactory;
     private readonly IReadOnlyList<IAxentPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>> _pipes;
@@ -30,22 +29,44 @@ internal sealed class {{ type.symbol_name }}Pipeline
         CancellationToken cancellationToken)
     {
         var context = _contextFactory.Get(request);
-        return Next(context, 0, cancellationToken);
+        return ExecuteInternal(context, 0, cancellationToken);
     }
 
-    Task<Response<{{ type.response_full_name }}>> IPipelineChain<{{ type.request_full_name }}, {{ type.response_full_name }}>.NextAsync(
+    private Task<Response<{{ type.response_full_name }}>> ExecuteInternal(
         RequestContext<{{ type.request_full_name }}> context,
         int index,
         CancellationToken cancellationToken)
-        => Next(context, index, cancellationToken);
-
-    private Task<Response<{{ type.response_full_name }}>> Next(
-        RequestContext<{{ type.request_full_name }}> context,
-        int index,
-        CancellationToken cancellationToken)
-        => index < _pipes.Count
-            ? _pipes[index].ProcessAsync(this, index + 1, context, cancellationToken)
-            : Task.FromException<Response<{{ type.response_full_name }}>>(
+    {
+        if ((uint)index >= (uint)_pipes.Count)
+        {
+            return Task.FromException<Response<{{ type.response_full_name }}>>(
                 new InvalidOperationException("Pipeline terminated without handler."));
+        }
+
+        return _pipes[index].ProcessAsync(
+            new Chain(this, index + 1),
+            context,
+            cancellationToken);
+    }
+
+    private sealed class Chain
+        : IPipelineChain<{{ type.request_full_name }}, {{ type.response_full_name }}>
+    {
+        private readonly {{ type.symbol_name }}Pipeline _pipeline;
+        private readonly int _index;
+
+        public Chain({{ type.symbol_name }}Pipeline pipeline, int index)
+        {
+            _pipeline = pipeline;
+            _index = index;
+        }
+
+        public Task<Response<{{ type.response_full_name }}>> NextAsync(
+            RequestContext<{{ type.request_full_name }}> context,
+            CancellationToken cancellationToken = default)
+        {
+            return _pipeline.ExecuteInternal(context, _index, cancellationToken);
+        }
+    }
 }
 {{ end }}

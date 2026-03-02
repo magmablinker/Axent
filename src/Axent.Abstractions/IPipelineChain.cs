@@ -2,8 +2,10 @@ namespace Axent.Abstractions;
 
 public interface IPipelineChain<TRequest, TResponse>
 {
+    /// <summary>
+    /// Moves to the next pipe in the chain.
+    /// </summary>
     Task<Response<TResponse>> NextAsync(
         RequestContext<TRequest> context,
-        int index,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default);
 }

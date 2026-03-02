@@ -11,9 +11,9 @@ internal sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TRequ
         _logger = logger;
     }
 
-    public Task<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, int nextIndex, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
+    public Task<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("This pipe runs during every request.");
-        return chain.NextAsync(context, nextIndex, cancellationToken);
+        return chain.NextAsync(context, cancellationToken);
     }
 }

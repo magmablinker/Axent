@@ -95,10 +95,10 @@ internal sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TRequ
         _logger = logger;
     }
 
-    public ValueTask<Response<TResponse>> ProcessAsync(Func<ValueTask<Response<TResponse>>> next, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
+    public Task<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("This pipe runs during every request.");
-        return next();
+        return chain.NextAsync(context, cancellationToken);
     }
 }
 
@@ -110,7 +110,7 @@ builder.Services.AddAxent()
 
 ### Specific Pipe
 ```csharp
-internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, Unit>
+internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, OtherResponse>
 {
     private readonly ILogger<OtherRequestPipe> _logger;
 
@@ -119,11 +119,10 @@ internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, Unit>
         _logger = logger;
     }
 
-
-    public ValueTask<Response<Unit>> ProcessAsync(Func<ValueTask<Response<Unit>>> next, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
+    public Task<Response<OtherResponse>> ProcessAsync(IPipelineChain<OtherRequest, OtherResponse> chain, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("I only run during other request");
-        return next();
+        return chain.NextAsync(context, cancellationToken);
     }
 }
 
@@ -165,30 +164,25 @@ public sealed class AxentErrorHandlingOptions
 
 ### Source Generated Dispatch
 ```
-
 BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.7840)
 Unknown processor
 .NET SDK 10.0.200-preview.0.26103.119
   [Host]     : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
   DefaultJob : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
-
-
 ```
 | Method                            | Mean     | Error    | StdDev   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
 |---------------------------------- |---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
-| &#39;SendAsync (cold)&#39;                | 38.51 ns | 0.807 ns | 2.168 ns |  1.00 |    0.08 | 0.0176 |     296 B |        1.00 |
-| &#39;SendAsync (warm, same instance)&#39; | 35.83 ns | 0.738 ns | 1.368 ns |  0.93 |    0.06 | 0.0162 |     272 B |        0.92 |
+| &#39;SendAsync (cold)&#39;                | 36.74 ns | 0.741 ns | 1.702 ns |  1.00 |    0.06 | 0.0196 |     328 B |        1.00 |
+| &#39;SendAsync (warm, same instance)&#39; | 33.97 ns | 0.423 ns | 0.353 ns |  0.93 |    0.04 | 0.0181 |     304 B |        0.93 |
+
 
 ### MediatR (v12.5.0)
 ```
-
 BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.7840)
 Unknown processor
 .NET SDK 10.0.200-preview.0.26103.119
   [Host]     : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
   DefaultJob : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
-
-
 ```
 | Method                       | Mean     | Error    | StdDev   | Gen0   | Allocated |
 |----------------------------- |---------:|---------:|---------:|-------:|----------:|

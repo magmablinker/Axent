@@ -15,27 +15,27 @@ public sealed class ErrorHandlingPipe<TRequest, TResponse>
         _logger = logger;
     }
 
-    public Task<Response<TResponse>> ProcessAsync(
+    public async Task<Response<TResponse>> ProcessAsync(
         IPipelineChain<TRequest, TResponse> chain,
-        int nextIndex,
         RequestContext<TRequest> context,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            return chain.NextAsync(context, nextIndex, cancellationToken);
+            // Call the next pipe in the chain
+            return await chain.NextAsync(context, cancellationToken);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "");
+            _logger.LogError(e, "An unhandled exception occurred in the pipeline.");
 
             var response = ErrorDefaults.Generic.InternalServerError();
             if (_options.EnableDetailedExceptionResponse)
             {
-                response.AddMessages([e.Message, e.StackTrace ?? "StackTrace is empty"]);
+                response.AddMessages(new[] { e.Message, e.StackTrace ?? "StackTrace is empty" });
             }
 
-            return Task.FromResult(Response.Failure<TResponse>(response));
+            return Response.Failure<TResponse>(response);
         }
     }
 }
