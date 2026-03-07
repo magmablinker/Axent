@@ -1,5 +1,6 @@
 ﻿using Axent.Abstractions;
 using Axent.Core;
+using Axent.Core.DependencyInjection;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 

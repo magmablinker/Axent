@@ -5,9 +5,9 @@ namespace Axent.ExampleApi;
 
 internal sealed record WelcomeRequest : IRequest<string>;
 
-internal sealed class WelcomeRequestHandler : RequestHandler<WelcomeRequest, string>
+internal sealed class WelcomeRequestHandler : IRequestHandler<WelcomeRequest, string>
 {
-    public override Task<Response<string>> HandleAsync(RequestContext<WelcomeRequest> context,
+    public ValueTask<Response<string>> HandleAsync(RequestContext<WelcomeRequest> context,
         CancellationToken cancellationToken = default) =>
-        Task.FromResult(Response.Success("Axent Example Api is up and running!"));
+        ValueTask.FromResult(Response.Success("Axent Example Api is up and running!"));
 }

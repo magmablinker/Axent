@@ -8,16 +8,17 @@
 [![Downloads](https://img.shields.io/nuget/dt/Axent.Core.svg)](https://www.nuget.org/packages/Axent.Core/)
 [![License](https://img.shields.io/badge/license-APACHE-blue)](LICENSE)
 
-**Axent** is a lightweight, high-performance .NET library for implementing CQRS patterns with minimal boilerplate. It provides a simple request/response pipeline and allows adding custom processors for advanced scenarios.
+**Axent** is a lightweight, high-performance .NET library for implementing CQRS patterns with minimal boilerplate. It provides a simple request/response pipeline. It is currently ~2x faster than MediatR.
 
 ---
 
 ## Features
-- Minimal setup for CQRS in .NET applications
-- Request/response handling with `RequestHandler<TRequest, TResponse>`
-- Extensible pipelines using `IAxentPipe<TRequest, TResponse>`
+- Minimal setup for CQRS
+- Minimal allocations
+- Simple dependency injection
+- ASP.NET Core integration
+- Typed pipelines
 - Optimized for performance and simplicity
-- Works seamlessly with ASP.NET Core
 
 ---
 
@@ -60,10 +61,10 @@ internal sealed class ExampleRequestHandler : RequestHandler<ExampleRequest, Uni
         _logger = logger;
     }
 
-    public override Task<Response<Unit>> HandleAsync(RequestContext<ExampleRequest> context, CancellationToken cancellationToken = default)
+    public override ValueTask<Response<Unit>> HandleAsync(RequestContext<ExampleRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Message from request '{0}'", context.Request.Message);
-        return Task.FromResult(Response.Success(Unit.Value));
+        return ValueTask.FromResult(Response.Success(Unit.Value));
     }
 }
 ```
@@ -95,7 +96,7 @@ internal sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TRequ
         _logger = logger;
     }
 
-    public Task<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("This pipe runs during every request.");
         return chain.NextAsync(context, cancellationToken);
@@ -119,7 +120,7 @@ internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, OtherResponse>
         _logger = logger;
     }
 
-    public Task<Response<OtherResponse>> ProcessAsync(IPipelineChain<OtherRequest, OtherResponse> chain, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<OtherResponse>> ProcessAsync(IPipelineChain<OtherRequest, OtherResponse> chain, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("I only run during other request");
         return chain.NextAsync(context, cancellationToken);

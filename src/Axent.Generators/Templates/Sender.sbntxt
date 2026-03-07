@@ -26,17 +26,17 @@ internal sealed class Sender : ISender
     }
 
 {{- for type in types }}
-    public Task<Response<{{ type.response_full_name }}>> SendAsync({{ type.request_full_name }} request, CancellationToken cancellationToken)
+    public ValueTask<Response<{{ type.response_full_name }}>> SendAsync({{ type.request_full_name }} request, CancellationToken cancellationToken)
         => _{{ type.symbol_name | string.slice 0 1 | string.downcase }}{{ type.symbol_name | string.slice 1 }}Pipeline.ExecuteAsync(request, cancellationToken);
 {{- end }}
 
-    public Task<Response<TResponse>> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken)
+    public async ValueTask<Response<TResponse>> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken)
     {
         return request switch
         {
-{{- for type in types }}
-            {{ type.request_full_name }} r => (Task<Response<TResponse>>)(object)SendAsync(r, cancellationToken),
-{{- end }}
+    {{- for type in types }}
+            {{ type.request_full_name }} r => (Response<TResponse>)(object)await SendAsync(r, cancellationToken),
+    {{- end }}
             _ => throw new InvalidOperationException($"No pipeline registered for request type '{request.GetType().FullName}'")
         };
     }

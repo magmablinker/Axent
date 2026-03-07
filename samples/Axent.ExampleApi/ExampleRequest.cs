@@ -13,7 +13,7 @@ internal sealed class ExampleResponse
     public required string Message { get; init; }
 }
 
-internal sealed class ExampleRequestHandler : RequestHandler<ExampleRequest, ExampleResponse>
+internal sealed class ExampleRequestHandler : IRequestHandler<ExampleRequest, ExampleResponse>
 {
     private static readonly Random Random = new ();
 
@@ -24,11 +24,11 @@ internal sealed class ExampleRequestHandler : RequestHandler<ExampleRequest, Exa
         _logger = logger;
     }
 
-    public override async Task<Response<ExampleResponse>> HandleAsync(RequestContext<ExampleRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<ExampleResponse>> HandleAsync(RequestContext<ExampleRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Message from request '{0}'", context.Request.Message);
-        await Task.Delay(1, cancellationToken);
-
-        return Random.Next(1, 100) % 2 == 0 ? Response.Failure(ErrorDefaults.Generic.BadRequest()) : Response.Success(new ExampleResponse() { Message = context.Request.Message });
+        return ValueTask.FromResult(Random.Next(1, 100) % 2 == 0
+            ? Response.Failure(ErrorDefaults.Generic.BadRequest())
+            : Response.Success(new ExampleResponse { Message = context.Request.Message }));
     }
 }

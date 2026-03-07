@@ -1,7 +1,8 @@
 using Axent.Abstractions;
+using Axent.Core.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Axent.Core;
+namespace Axent.Core.Observability;
 
 public sealed class ErrorHandlingPipe<TRequest, TResponse>
     : IAxentPipe<TRequest, TResponse>
@@ -15,27 +16,37 @@ public sealed class ErrorHandlingPipe<TRequest, TResponse>
         _logger = logger;
     }
 
-    public async Task<Response<TResponse>> ProcessAsync(
+    public async ValueTask<Response<TResponse>> ProcessAsync(
         IPipelineChain<TRequest, TResponse> chain,
         RequestContext<TRequest> context,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            // Call the next pipe in the chain
             return await chain.NextAsync(context, cancellationToken);
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An unhandled exception occurred in the pipeline.");
+            _logger.PipelineExecutionFailed(e);
 
             var response = ErrorDefaults.Generic.InternalServerError();
             if (_options.EnableDetailedExceptionResponse)
             {
-                response.AddMessages(new[] { e.Message, e.StackTrace ?? "StackTrace is empty" });
+                response.AddMessages([e.Message, e.StackTrace ?? "StackTrace is empty"]);
             }
 
             return Response.Failure<TResponse>(response);
         }
     }
+}
+
+internal static partial class ErrorHandlingPipeLoggerExtensions
+{
+    [LoggerMessage(
+        EventId = 0,
+        Level = LogLevel.Error,
+        Message = "An unhandled exception occurred during the pipeline execution."),
+        ]
+    public static partial void PipelineExecutionFailed(
+        this ILogger logger, Exception exception);
 }

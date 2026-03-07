@@ -13,7 +13,7 @@ namespace Axent.Generated;
 internal sealed class {{ type.symbol_name }}Pipeline
 {
     private readonly IRequestContextFactory _contextFactory;
-    private readonly IReadOnlyList<IAxentPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>> _pipes;
+    private readonly Func<RequestContext<{{ type.request_full_name }}>, CancellationToken, ValueTask<Response<{{ type.response_full_name }}>>> _compiled;
 
     public {{ type.symbol_name }}Pipeline(
         IRequestContextFactory contextFactory,
@@ -21,51 +21,55 @@ internal sealed class {{ type.symbol_name }}Pipeline
         {{ type.symbol_name }}HandlerPipe handlerPipe)
     {
         _contextFactory = contextFactory;
-        _pipes = [..pipes, handlerPipe];
+
+        var pipeline = new List<IAxentPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>>(pipes);
+        pipeline.Add(handlerPipe);
+
+        _compiled = BuildPipeline(pipeline);
     }
 
-    public Task<Response<{{ type.response_full_name }}>> ExecuteAsync(
+    public ValueTask<Response<{{ type.response_full_name }}>> ExecuteAsync(
         {{ type.request_full_name }} request,
         CancellationToken cancellationToken)
     {
         var context = _contextFactory.Get(request);
-        return ExecuteInternal(context, 0, cancellationToken);
+        return _compiled(context, cancellationToken);
     }
 
-    private Task<Response<{{ type.response_full_name }}>> ExecuteInternal(
-        RequestContext<{{ type.request_full_name }}> context,
-        int index,
-        CancellationToken cancellationToken)
+    private static Func<RequestContext<{{ type.request_full_name }}>, CancellationToken, ValueTask<Response<{{ type.response_full_name }}>>> BuildPipeline(
+        IReadOnlyList<IAxentPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>> pipes)
     {
-        if ((uint)index >= (uint)_pipes.Count)
-        {
-            return Task.FromException<Response<{{ type.response_full_name }}>>(
+        Func<RequestContext<{{ type.request_full_name }}>, CancellationToken, ValueTask<Response<{{ type.response_full_name }}>>> next =
+            static (_, _) => ValueTask.FromException<Response<{{ type.response_full_name }}>>(
                 new InvalidOperationException("Pipeline terminated without handler."));
+
+        for (var i = pipes.Count - 1; i >= 0; i--)
+        {
+            var pipe = pipes[i];
+            var currentNext = next;
+            var chain = new Chain(currentNext);
+
+            next = (context, cancellationToken) => pipe.ProcessAsync(chain, context, cancellationToken);
         }
 
-        return _pipes[index].ProcessAsync(
-            new Chain(this, index + 1),
-            context,
-            cancellationToken);
+        return next;
     }
 
     private sealed class Chain
         : IPipelineChain<{{ type.request_full_name }}, {{ type.response_full_name }}>
     {
-        private readonly {{ type.symbol_name }}Pipeline _pipeline;
-        private readonly int _index;
+        private readonly Func<RequestContext<{{ type.request_full_name }}>, CancellationToken, ValueTask<Response<{{ type.response_full_name }}>>> _next;
 
-        public Chain({{ type.symbol_name }}Pipeline pipeline, int index)
+        public Chain(Func<RequestContext<{{ type.request_full_name }}>, CancellationToken, ValueTask<Response<{{ type.response_full_name }}>>> next)
         {
-            _pipeline = pipeline;
-            _index = index;
+            _next = next;
         }
 
-        public Task<Response<{{ type.response_full_name }}>> NextAsync(
+        public ValueTask<Response<{{ type.response_full_name }}>> NextAsync(
             RequestContext<{{ type.request_full_name }}> context,
             CancellationToken cancellationToken = default)
         {
-            return _pipeline.ExecuteInternal(context, _index, cancellationToken);
+            return _next(context, cancellationToken);
         }
     }
 }

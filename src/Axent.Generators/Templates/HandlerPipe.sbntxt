@@ -19,7 +19,7 @@ internal sealed class {{ type.symbol_name }}HandlerPipe
         _requestHandler = requestHandler;
     }
 
-    public Task<Response<{{ type.response_full_name }}>> ProcessAsync(
+    public ValueTask<Response<{{ type.response_full_name }}>> ProcessAsync(
         IPipelineChain<{{ type.request_full_name }}, {{ type.response_full_name }}> chain,
         RequestContext<{{ type.request_full_name }}> context,
         CancellationToken cancellationToken = default)

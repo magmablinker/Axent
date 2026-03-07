@@ -15,7 +15,7 @@ public interface IAxentPipe<TRequest, TResponse> : IAxentPipe
     /// <param name="context">Request context.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Response from this pipe or downstream.</returns>
-    Task<Response<TResponse>> ProcessAsync(
+    ValueTask<Response<TResponse>> ProcessAsync(
         IPipelineChain<TRequest, TResponse> chain,
         RequestContext<TRequest> context,
         CancellationToken cancellationToken = default);

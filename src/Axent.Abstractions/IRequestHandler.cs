@@ -1,13 +1,12 @@
 namespace Axent.Abstractions;
 
-// TODO: Remove this interface
-public interface IRequestHandler
-{
-    Task<object> HandleAsync(RequestContext<object> context, CancellationToken cancellationToken = default);
-}
+/// <summary>
+/// Marker interface. Do not implement.
+/// </summary>
+public interface IRequestHandler;
 
 public interface IRequestHandler<TRequest, TResponse> : IRequestHandler
     where TRequest : class, IRequest<TResponse>
 {
-    Task<Response<TResponse>> HandleAsync(RequestContext<TRequest> context, CancellationToken cancellationToken = default);
+    ValueTask<Response<TResponse>> HandleAsync(RequestContext<TRequest> context, CancellationToken cancellationToken = default);
 }

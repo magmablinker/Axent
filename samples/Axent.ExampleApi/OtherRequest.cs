@@ -22,14 +22,14 @@ internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, OtherResponse>
         _logger = logger;
     }
 
-    public Task<Response<OtherResponse>> ProcessAsync(IPipelineChain<OtherRequest, OtherResponse> chain, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<OtherResponse>> ProcessAsync(IPipelineChain<OtherRequest, OtherResponse> chain, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("I only run during other request");
         return chain.NextAsync(context, cancellationToken);
     }
 }
 
-internal sealed class OtherRequestHandler : RequestHandler<OtherRequest, OtherResponse>
+internal sealed class OtherRequestHandler : IRequestHandler<OtherRequest, OtherResponse>
 {
     private readonly ILogger<OtherRequestHandler> _logger;
 
@@ -38,9 +38,9 @@ internal sealed class OtherRequestHandler : RequestHandler<OtherRequest, OtherRe
         _logger = logger;
     }
 
-    public override Task<Response<OtherResponse>> HandleAsync(RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<OtherResponse>> HandleAsync(RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Message from request '{0}'", context.Request.Message);
-        return Task.FromResult(Response.Success(new OtherResponse { Message = context.Request.Message }));
+        return ValueTask.FromResult(Response.Success(new OtherResponse { Message = context.Request.Message }));
     }
 }
