@@ -9,4 +9,8 @@
       <PackageReference Include="Axent.Extensions.AspNetCore" Version="*" />
     </ItemGroup>
   
+    <ItemGroup>
+      <Content Include=".template.config\template.json" />
+    </ItemGroup>
+  
 </Project>

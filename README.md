@@ -102,7 +102,7 @@ app.MapGet("/api/example", async (ISender sender, CancellationToken cancellation
 
 ### Or alternatively using the template
 ```shell
-dotnet new install Axent.Templates
+dotnet new install Axent.Templates.MinimalApi
 dotnet new axent-api
 ```
 
