@@ -3,5 +3,5 @@ using BenchmarkDotNet.Running;
 
 BenchmarkRunner.Run([
     typeof(SourceGeneratedSenderBenchmarks),
-    //typeof(MediatorSenderBenchmarks),
+    typeof(MediatorSenderBenchmarks),
 ]);
