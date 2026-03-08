@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Axent.Core;
+namespace Axent.Core.DependencyInjection;
 
 public sealed class AxentBuilder
 {
     public IServiceCollection Services { get; }
-    
+
     public AxentBuilder(IServiceCollection serviceCollection)
     {
         Services = serviceCollection;

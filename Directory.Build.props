@@ -13,7 +13,7 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryUrl>https://github.com/magmablinker/Axent</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes>https://github.com/magmablinker/Axent/CHANGELOG.md</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/magmablinker/Axent/blob/main/CHANGELOG.md</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

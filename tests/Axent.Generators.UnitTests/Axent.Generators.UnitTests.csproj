@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Axent.Generators\Axent.Generators.csproj" />
+    <ProjectReference Include="..\..\src\Axent.Abstractions\Axent.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Axent.Core\Axent.Core.csproj" />
+  </ItemGroup>
+</Project>

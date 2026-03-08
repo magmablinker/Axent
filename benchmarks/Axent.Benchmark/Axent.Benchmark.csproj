@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
       <OutputType>Exe</OutputType>
       <Optimize>true</Optimize>
@@ -9,12 +8,11 @@
 
     <ItemGroup>
       <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
+      <PackageReference Include="MediatR" Version="12.5.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\Axent.Core\Axent.Core.csproj" />
-      <ProjectReference Include="..\..\src\Axent.Abstractions\Axent.Abstractions.csproj" />
-      <ProjectReference Include="..\..\src\Axent.Generators\Axent.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+      <ProjectReference Include="..\..\src\Axent.Generators\Axent.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     </ItemGroup>
-
 </Project>

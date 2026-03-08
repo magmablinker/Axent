@@ -3,7 +3,7 @@
 
 using System.Runtime.CompilerServices;
 using Axent.Abstractions;
-using Axent.Core;
+using Axent.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Axent.Generated;

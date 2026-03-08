@@ -6,195 +6,238 @@
 [![NuGet](https://img.shields.io/nuget/v/Axent.Core?label=Axent.Core)](https://www.nuget.org/packages/Axent.Core)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Extensions.AspNetCore?label=Axent.Extensions.AspNetCore)](https://www.nuget.org/packages/Axent.Extensions.AspNetCore)
 [![Downloads](https://img.shields.io/nuget/dt/Axent.Core.svg)](https://www.nuget.org/packages/Axent.Core/)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/magmablinker/Axent/pr.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=magmablinker_Axent&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=magmablinker_Axent)
 [![License](https://img.shields.io/badge/license-APACHE-blue)](LICENSE)
 
-**Axent** is a lightweight, high-performance .NET library for implementing CQRS patterns with minimal boilerplate. It provides a simple request/response pipeline and allows adding custom processors for advanced scenarios.
+**Axent** is a lightweight, high-performance .NET library for implementing the CQRS pattern with minimal boilerplate. It provides a source-generated, typed request/response pipeline — currently ~2x faster than [MediatR (v12.5)](https://github.com/LuckyPennySoftware/MediatR) with fewer allocations.
 
 ---
 
-## Features
-- Minimal setup for CQRS in .NET applications
-- Request/response handling with `RequestHandler<TRequest, TResponse>`
-- Extensible pipelines using `IAxentPipe<TRequest, TResponse>`
-- Optimized for performance and simplicity
-- Works seamlessly with ASP.NET Core
-- Choose between a source generated or reflection based sender implementation
+## Why Axent?
+* 🚀 Fast: source generated dispatch with zero reflection
+* 🧩 Minimal: very little setup
+* 🧠 Strongly typed, extensible pipelines for cross-cutting concerns
+* 🌐 First class ASP.NET Core integration
+* ⚙️ Built for modern .NET (8+)
+
+## 📦 Features
+
+- Minimal setup and boilerplate
+- Source-generated dispatch — no reflection at runtime
+- Typed pipelines with support for generic and request-specific pipes
+- Separate marker interfaces for commands and queries (`ICommand<TResponse>`, `IQuery<TResponse>`)
+- Built-in support for transactions, logging, and error handling via pipeline options
+- ASP.NET Core integration
+- .NET 8+ optimized
 
 ---
 
 ## Prerequisites
+
 - .NET 8 or later
 
-## Getting started
+---
+
+## 🚀 Getting Started
+
 ### 1. Install Packages
 ```shell
-dotnet add package Axent.Core --version 1.1.0
-dotnet add package Axent.Extensions.AspNetCore --version 1.1.0
+dotnet add package Axent.Core --version 1.2.0
+dotnet add package Axent.Extensions.AspNetCore --version 1.2.0
 ```
 
 ### 2. Register Services
 ```csharp
-builder.Services.AddHttpContextAccessor()
 builder.Services.AddAxent()
     .AddRequestHandlers(AssemblyProvider.Current);
 ```
 
-### 3. Implement a Request Handler
-*Example showing a request that logs a message*
+### 3. Create a Request and Handler
+- IQuery<TResponse> for read operations
+- ICommand<TResponse> for write operations
+- IRequest<TResponse> if you don't want to differentiate
+- IRequestHandler<TRequest, TResponse> to handle them
+
 ```csharp
 using Axent.Abstractions;
-using Axent.Core;
 
 namespace Axent.ExampleApi;
 
-internal sealed class ExampleRequest : IRequest<Unit>
+internal sealed class ExampleQuery : IQuery
 {
     public required string Message { get; init; }
 }
 
-internal sealed class ExampleRequestHandler : RequestHandler<ExampleRequest, Unit>
+internal sealed class ExampleQueryHandler : IRequestHandler
 {
-    private readonly ILogger<ExampleRequestHandler> _logger;
+    private readonly ILogger _logger;
 
-    public ExampleRequestHandler(ILogger<ExampleRequestHandler> logger)
+    public ExampleQueryHandler(ILogger logger)
     {
         _logger = logger;
     }
 
-    public override Task<Response<Unit>> HandleAsync(RequestContext<ExampleRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response> HandleAsync(RequestContext context, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Message from request '{0}'", context.Request.Message);
-        return Task.FromResult(Response.Success(Unit.Value));
+        _logger.LogInformation("Message from request '{Message}'", context.Request.Message);
+        return ValueTask.FromResult(Response.Success(Unit.Value));
     }
 }
 ```
 
-### 4. Call the Request Handler in an API Endpoint
+### 4. Send a Request
+Inject ISender into endpoints or application services.
+
 ```csharp
 app.MapGet("/api/example", async (ISender sender, CancellationToken cancellationToken) =>
 {
-    var request = new ExampleRequest
-    {
-        Message = "Hello World!"
-    };
-
-    var response = await sender.SendAsync(request, cancellationToken);
+    var response = await sender.SendAsync(new ExampleQuery { Message = "Hello World!" }, cancellationToken);
     return response.ToResult();
 });
 ```
 
-## Pipelines
-Axent allows you to add custom processors to your request pipeline by implementing `IAxentPipe<TRequest, TResponse>`. This is useful for logging, validation, metrics, or any cross-cutting concerns.
-### Generic Pipe
-```csharp
-internal sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TRequest, TResponse>
-{
-    private readonly ILogger<ExampleRequestPipe<TRequest, TResponse>> _logger;
+---
 
-    public ExampleRequestPipe(ILogger<ExampleRequestPipe<TRequest, TResponse>> logger)
+## 🔁 Pipelines
+Pipelines allow you to add cross-cutting behavior such as:
+
+- Logging
+- Validation
+- Metrics
+- Authorization
+- Caching
+
+Implement
+```csharp
+IAxentPipe<TRequest, TResponse>
+```
+
+Pipes are executed in registration order before the handler.
+
+### 🌐 Generic Pipe
+Runs for all request types.
+```csharp
+internal sealed class LoggingPipe : IAxentPipe
+{
+    private readonly ILogger<LoggingPipe> _logger;
+
+    public LoggingPipe(ILogger<LoggingPipe> logger)
     {
         _logger = logger;
     }
 
-    public ValueTask<Response<TResponse>> ProcessAsync(Func<ValueTask<Response<TResponse>>> next, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response> ProcessAsync(IPipelineChain chain, RequestContext context, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("This pipe runs during every request.");
-        return next();
+        _logger.LogInformation("Handling {Request}", typeof(TRequest).Name);
+        return chain.NextAsync(context, cancellationToken);
     }
 }
-
+```
+#### Registration
+```csharp
 builder.Services.AddAxent()
     .AddRequestHandlers(AssemblyProvider.Current)
-    .AddPipe(typeof(ExampleRequestPipe<,>));
+    .AddPipe(typeof(LoggingPipe));
 ```
-> This pipe executes for every request handled by Axent.
 
-### Specific Pipe
+### 🎯 Request Specific Pipe
+Runs only for a single request type.
 ```csharp
-internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, Unit>
+internal sealed class OtherRequestPipe : IAxentPipe
 {
-    private readonly ILogger<OtherRequestPipe> _logger;
+    private readonly ILogger _logger;
 
-    public OtherRequestPipe(ILogger<OtherRequestPipe> logger)
+    public OtherRequestPipe(ILogger logger)
     {
         _logger = logger;
     }
 
-
-    public ValueTask<Response<Unit>> ProcessAsync(Func<ValueTask<Response<Unit>>> next, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response> ProcessAsync(IPipelineChain chain, RequestContext context, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("I only run during other request");
-        return next();
+        _logger.LogInformation("Running pipe for OtherRequest");
+        return chain.NextAsync(context, cancellationToken);
     }
 }
+```
 
+#### Registration
+```csharp
 builder.Services.AddAxent()
     .AddRequestHandlers(AssemblyProvider.Current)
-    .AddPipe<OtherRequestPipe>();
+    .AddPipe();
 ```
-> This pipe executes for every request of the type `OtherRequest`
 
-## Options
+---
 
-### `AxentOptions`
-
-AxentOptions allows you to configure optional settings that modify the behavior of the Axent library.
-
+## ⚙️ Configuration
+Customize behavior via AxentOptions.
 ```csharp
-public sealed class AxentOptions
+builder.Services.AddAxent(options =>
 {
-    /// <summary>
-    /// Determines whether to use the source-generated sender implementation.
-    /// Defaults to true.
-    /// </summary>
-    public bool UseSourceGeneratedSender { get; set; } = true;
-}
+    options.ErrorHandling = new AxentErrorHandlingOptions
+    {
+        EnableDetailedExceptionResponse = false
+    };
+
+    options.Logging = new AxentLoggingOptions
+    {
+        EnableRequestLogging = true
+    };
+
+    options.Transactions = new AxentTransactionOptions
+    {
+        UseTransactions = true
+    };
+});
 ```
 
-### Using Reflection Based Sender Implementation
+| Option                                         | Description                                                                                                                                  | Default               |
+|------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
+| `ErrorHandling`                                | Enables pipeline exception handling. EnableDetailedExceptionResponse includes exception details in responses. If null, exceptions propagate. | `null`                |
+| `Logging.EnableRequestLogging`                 | Logs the full request object via `ILogger` before processing. Avoid in production if requests contain sensitive data.                        | `false`               |
+| `Transactions.UseTransactions`                 | Wraps `ICommand` handlers in a TransactionScope. Has no effect on `IQuery` handlers.                                                         | `true`                |
+| `Transactions.TransactionOptions`              | Isolation level and timeout settings.                                                                                                        | `ReadCommitted`, 180s |
+| `Transactions.TransactionScopeOption`          | Interaction with ambient transactions.                                                                                                       | `Required`            |
+| `Transactions.TransactionScopeAsyncFlowOption` | Controls async transaction flow.                                                                                                             | `Enabled`             |
 
-You can switch to the reflection-based sender by setting UseSourceGeneratedSender to false:
+---
 
-```csharp
-builder.Services.AddAxent(o => o.UseSourceGeneratedSender = false)
-    .AddRequestHandlers(AssemblyProvider.Current)
-    .AddPipe<OtherRequestPipe>();
-```
-> By default, if no options are provided, the source-generated sender is used.
+## 📊 Benchmarks
 
-## Benchmark
-
-### Source Generated Dispatch
-```
-BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.7840)
-11th Gen Intel Core i9-11900K 3.50GHz, 1 CPU, 16 logical and 8 physical cores
-.NET SDK 9.0.203
-  [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
-  DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
-```
-
-| Method                            | Mean     | Error    | StdDev   | Median   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
-|---------------------------------- |---------:|---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
-| &#39;SendAsync (cold)&#39;                | 267.4 ns | 20.59 ns | 60.72 ns | 229.1 ns |  1.05 |    0.32 | 0.0753 |     632 B |        1.00 |
-| &#39;SendAsync (warm, same instance)&#39; | 220.6 ns |  4.37 ns |  6.12 ns | 219.7 ns |  0.86 |    0.17 | 0.0725 |     608 B |        0.96 |
-
-### Reflection Dispatch
+### Axent (Source Generated Dispatch)
 ```
 BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.7840)
-11th Gen Intel Core i9-11900K 3.50GHz, 1 CPU, 16 logical and 8 physical cores
-.NET SDK 9.0.203
-  [Host]     : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
-  DefaultJob : .NET 8.0.1 (8.0.123.58001), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
+Unknown processor
+.NET SDK 10.0.200-preview.0.26103.119
+  [Host]     : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
+  DefaultJob : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
 ```
+| Method                                    |     Mean |    Error |   StdDev | Ratio | RatioSD |   Gen0 | Allocated | Alloc Ratio |
+|-------------------------------------------|---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
+| &#39;SendAsync (cold)&#39;                | 36.74 ns | 0.741 ns | 1.702 ns |  1.00 |    0.06 | 0.0196 |     328 B |        1.00 |
+| &#39;SendAsync (warm, same instance)&#39; | 33.97 ns | 0.423 ns | 0.353 ns |  0.93 |    0.04 | 0.0181 |     304 B |        0.93 |
 
-| Method                            | Mean       | Error    | StdDev    | Median     | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
-|---------------------------------- |-----------:|---------:|----------:|-----------:|------:|--------:|-------:|----------:|------------:|
-| &#39;SendAsync (cold)&#39;                | 1,149.5 ns | 56.12 ns | 165.46 ns | 1,205.2 ns |  1.02 |    0.22 | 0.1249 |   1.02 KB |        1.00 |
-| &#39;SendAsync (warm, same instance)&#39; |   853.3 ns | 16.94 ns |  25.35 ns |   852.8 ns |  0.76 |    0.13 | 0.1221 |      1 KB |        0.98 |
 
+### MediatR (v12.5.0)
+```
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.7840)
+Unknown processor
+.NET SDK 10.0.200-preview.0.26103.119
+  [Host]     : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
+  DefaultJob : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
+```
+| Method                               |     Mean |    Error |   StdDev |   Gen0 | Allocated |
+|--------------------------------------|---------:|---------:|---------:|-------:|----------:|
+| &#39;Send (cold)&#39;                | 79.03 ns | 1.526 ns | 2.713 ns | 0.0257 |     432 B |
+| &#39;Send (warm, same instance)&#39; | 79.21 ns | 1.566 ns | 3.783 ns | 0.0243 |     408 B |
 
-## Contributing
-Contributions are welcome! Please open an issue or pull request for bug fixes, improvements, or new features.
+## 🤝 Contributing
+Contributions are welcome.
+If you find a bug, have an improvement, or want to propose a feature:
+1. Open an issue
+2. Start a discussion
+3. Submit a pull request
 
-## License
-This project is licensed under the Apache License.
+## 📄 License
+This project is licensed under the Apache License 2.0. See [`LICENSE`](https://github.com/magmablinker/Axent/blob/main/LICENSE) for details.

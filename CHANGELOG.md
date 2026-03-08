@@ -1,37 +1,30 @@
 # Changelog
 
-## [1.1.0]
+## [1.2.0]
 
 ### Breaking Changes
-- None
+- `Task<Response<TResponse>>` return type changed to `ValueTask<Response<TResponse>>` across all interface methods
+- Removed reflection-based implementation
 
 ### Features Added
-- Improve performance by using source generated implementation of ISender instead of reflection
+- Improved source-generated dispatcher performance
+- Added built-in pipes for
+  - observability
+  - request logging
+  - transactions
 
-### Bugs Fixed
-- None
+## [1.1.0]
+
+### Features Added
+- Replaced reflection-based `ISender` with a source-generated implementation for improved performance
 
 ## [1.0.1]
 
-### Breaking Changes
-- None
-
 ### Features Added
-- Add easier way to register Pipelines
-- Improve `Result` class
-	- Old: `Result<ResponseDto>.Success(new ResponseDto());`
-	- New: `Result.Success(new ResponseDto())`;
-
-### Bugs Fixed
-- None
+- Simplified pipeline registration
+- Improved `Result` class instantiation — `Result.Success(new ResponseDto())` replaces `Result<ResponseDto>.Success(new ResponseDto())`
 
 ## [1.0.0]
 
-### Breaking Changes
-- None
-
 ### Features Added
-- Initial Release
-
-### Bugs Fixed
-- None
+- Initial release

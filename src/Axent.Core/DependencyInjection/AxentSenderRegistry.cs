@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Axent.Core;
+namespace Axent.Core.DependencyInjection;
 
 /// <summary>
 /// A static registry that the source-generated module initializer writes into

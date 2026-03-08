@@ -8,6 +8,6 @@
     <ProjectReference Include="..\..\src\Axent.Abstractions\Axent.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Axent.Core\Axent.Core.csproj" />
     <ProjectReference Include="..\..\src\Axent.Extensions.AspNetCore\Axent.Extensions.AspNetCore.csproj" />
-    <ProjectReference Include="..\..\src\Axent.Generators\Axent.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="all" />
+    <ProjectReference Include="..\..\src\Axent.Generators\Axent.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace Axent.Core;
+namespace Axent.Abstractions;
 
 /// <summary>
 /// Use this type when your IRequestHandler should return void
@@ -6,9 +6,9 @@
 public sealed class Unit
 {
     public static Unit Value => new();
-    
+
     private Unit()
     {
-        
+
     }
 }

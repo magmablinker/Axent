@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 
 namespace Axent.Abstractions;
 
@@ -9,7 +9,7 @@ public sealed class Error : IEquatable<Error>
     public List<string> Messages { get; }
 
     private readonly int _hashCode;
-    
+
     public Error(string identifier, HttpStatusCode statusCode, params string[] messages)
     {
         Identifier = identifier;
@@ -33,7 +33,11 @@ public sealed class Error : IEquatable<Error>
 
     public Error AddMessages(IEnumerable<string> messages)
     {
-        foreach (var message in messages) AddMessage(message);
+        foreach (var message in messages)
+        {
+            AddMessage(message);
+        }
+
         return this;
     }
 

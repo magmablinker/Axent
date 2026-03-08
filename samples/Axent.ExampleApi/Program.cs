@@ -1,22 +1,27 @@
 using Axent.Abstractions;
-using Axent.Core;
+using Axent.Core.DependencyInjection;
 using Axent.ExampleApi;
 using Axent.Extensions.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddAxent()
-    .AddRequestHandlers(AssemblyProvider.Current)
+builder.Services.AddAxent(o => builder.Configuration.Bind("AppSettings:Axent", o))
+    .AddTracing()
+    .AddRequestHandlersFromAssembly(AssemblyProvider.Current)
     .AddPipe<OtherRequestPipe>()
     .AddPipe(typeof(ExampleRequestPipe<,>));
 
 var app = builder.Build();
 
-app.MapGet("/", () => "Axent Example Api is up and running!");
+app.MapGet("/", async (ISender sender, CancellationToken cancellationToken) =>
+{
+    var response = await sender.SendAsync(new WelcomeRequest(), cancellationToken);
+    return response.ToResult();
+});
 
 app.MapGet("/api/example", async (ISender sender, CancellationToken cancellationToken) =>
 {
-    var request = new ExampleRequest
+    var request = new ExampleCommand
     {
         Message = "Hello World!"
     };

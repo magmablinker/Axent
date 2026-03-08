@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Axent.Abstractions;
 
@@ -41,8 +41,7 @@ public sealed class Response<TResponse> : IResponse
 public static class Response
 {
     public static ResponseBase Success() => new();
-    public static ResponseBase Failure(Error error) => new() { Error = error };
-
     public static Response<TResponse> Success<TResponse>(TResponse value) => new() { Value = value };
+    public static ResponseBase Failure(Error error) => new() { Error = error };
     public static Response<TResponse> Failure<TResponse>(Error error) => new() { Error = error };
 }

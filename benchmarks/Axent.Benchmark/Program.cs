@@ -1,5 +1,7 @@
-﻿using Axent.Benchmark;
+using Axent.Benchmark;
 using BenchmarkDotNet.Running;
 
-// BenchmarkRunner.Run<ReflectionSenderBenchmarks>();
-BenchmarkRunner.Run<SourceGeneratedSenderBenchmarks>();
+BenchmarkRunner.Run([
+    typeof(SourceGeneratedSenderBenchmarks),
+    typeof(MediatorSenderBenchmarks),
+]);

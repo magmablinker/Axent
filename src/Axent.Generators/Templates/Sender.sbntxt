@@ -5,34 +5,39 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Axent.Abstractions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Axent.Generated;
 
 internal sealed class Sender : ISender
 {
-    {{- for type in types }}
-    private readonly {{ type.symbol_name }}Pipeline _{{ type.symbol_name }}Pipeline;
-    {{- end }}
+{{- for type in types }}
+    private readonly {{ type.symbol_name }}Pipeline _{{ type.symbol_name | string.slice 0 1 | string.downcase }}{{ type.symbol_name | string.slice 1 }}Pipeline;
+{{- end }}
 
-    public Sender(IServiceProvider serviceProvider)
+    public Sender(
+{{- for type in types }}
+        {{ type.symbol_name }}Pipeline {{ type.symbol_name | string.slice 0 1 | string.downcase }}{{ type.symbol_name | string.slice 1 }}Pipeline{{ if !for.last }},{{ end }}
+{{- end }}
+    )
     {
-        {{- for type in types }}
-        _{{ type.symbol_name }}Pipeline = serviceProvider.GetRequiredService<{{ type.symbol_name }}Pipeline>();
-        {{- end }}
+{{- for type in types }}
+        _{{ type.symbol_name | string.slice 0 1 | string.downcase }}{{ type.symbol_name | string.slice 1 }}Pipeline = {{ type.symbol_name | string.slice 0 1 | string.downcase }}{{ type.symbol_name | string.slice 1 }}Pipeline;
+{{- end }}
     }
 
-    public Task<Response<TResponse>> SendAsync<TResponse>(
-        IRequest<TResponse> request,
-        CancellationToken cancellationToken)
+{{- for type in types }}
+    public ValueTask<Response<{{ type.response_full_name }}>> SendAsync({{ type.request_full_name }} request, CancellationToken cancellationToken)
+        => _{{ type.symbol_name | string.slice 0 1 | string.downcase }}{{ type.symbol_name | string.slice 1 }}Pipeline.ExecuteAsync(request, cancellationToken);
+{{- end }}
+
+    public async ValueTask<Response<TResponse>> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken)
     {
         return request switch
         {
-            {{- for type in types }}
-            {{ type.request_full_name }} r => (Task<Response<TResponse>>)(object)_{{ type.symbol_name }}Pipeline.ExecuteAsync(r, cancellationToken),
-            {{- end }}
-            _ => throw new InvalidOperationException(
-                $"No pipeline found for request type '{request.GetType().FullName}'.")
+    {{- for type in types }}
+            {{ type.request_full_name }} r => (Response<TResponse>)(object)await SendAsync(r, cancellationToken),
+    {{- end }}
+            _ => throw new InvalidOperationException($"No pipeline registered for request type '{request.GetType().FullName}'")
         };
     }
 }

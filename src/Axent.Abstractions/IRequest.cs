@@ -1,3 +1,6 @@
-﻿namespace Axent.Abstractions;
+namespace Axent.Abstractions;
 
-public interface IRequest<TResponse>;
+// ReSharper disable once UnusedTypeParameter
+#pragma warning disable S2326
+public interface IRequest<out TResponse>;
+#pragma warning restore S2326
