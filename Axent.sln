@@ -37,6 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\publish-nuget.yml = .github\workflows\publish-nuget.yml
 		.github\workflows\pr.yml = .github\workflows\pr.yml
+		.github\workflows\main-analysis.yml = .github\workflows\main-analysis.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Generators", "src\Axent.Generators\Axent.Generators.csproj", "{23A3BB78-4694-FAEB-4B32-08FC44254EC9}"
