@@ -1,4 +1,4 @@
-﻿using System.Transactions;
+using System.Transactions;
 using Axent.Abstractions;
 using Axent.Core.DependencyInjection;
 

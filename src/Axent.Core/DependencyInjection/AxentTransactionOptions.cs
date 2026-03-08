@@ -1,4 +1,4 @@
-﻿using System.Transactions;
+using System.Transactions;
 
 namespace Axent.Core.DependencyInjection;
 

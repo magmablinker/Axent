@@ -1,4 +1,4 @@
-﻿// ReSharper disable NotAccessedPositionalProperty.Global
+// ReSharper disable NotAccessedPositionalProperty.Global
 namespace Axent.Generators;
 
 internal sealed record RequestTypeInfo(

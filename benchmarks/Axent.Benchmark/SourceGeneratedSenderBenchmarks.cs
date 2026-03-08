@@ -1,5 +1,4 @@
-﻿using Axent.Abstractions;
-using Axent.Core;
+using Axent.Abstractions;
 using Axent.Core.DependencyInjection;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +23,7 @@ public class SourceGeneratedSenderBenchmarks
 
         var provider = services.BuildServiceProvider();
         _sender = provider.GetRequiredService<ISender>();
-        _request = new ("hello");
+        _request = new("hello");
     }
 
     [Benchmark(Baseline = true, Description = "SendAsync (cold)")]

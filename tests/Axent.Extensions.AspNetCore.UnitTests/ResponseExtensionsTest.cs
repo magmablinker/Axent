@@ -1,9 +1,8 @@
-﻿using System.Net;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices.JavaScript;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Axent.Abstractions;
-using Axent.Core;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Xunit;
 
 namespace Axent.Extensions.AspNetCore.UnitTests;

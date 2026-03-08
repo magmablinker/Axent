@@ -1,5 +1,4 @@
-﻿using Axent.Abstractions;
-using Axent.Core;
+using Axent.Abstractions;
 
 namespace Axent.Benchmark;
 

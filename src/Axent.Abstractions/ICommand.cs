@@ -1,4 +1,4 @@
-﻿namespace Axent.Abstractions;
+namespace Axent.Abstractions;
 
 /// <summary>
 /// Marker interface for commands

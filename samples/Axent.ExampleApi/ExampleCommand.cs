@@ -1,4 +1,4 @@
-﻿using Axent.Abstractions;
+using Axent.Abstractions;
 
 namespace Axent.ExampleApi;
 
@@ -14,7 +14,7 @@ internal sealed class ExampleResponse
 
 internal sealed class ExampleRequestHandler : IRequestHandler<ExampleCommand, ExampleResponse>
 {
-    private static readonly Random Random = new ();
+    private static readonly Random Random = new();
 
     private readonly ILogger<ExampleRequestHandler> _logger;
 

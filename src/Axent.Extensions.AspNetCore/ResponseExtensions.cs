@@ -1,6 +1,5 @@
-﻿using Axent.Abstractions;
+using Axent.Abstractions;
 using Microsoft.AspNetCore.Http;
-using Axent.Core;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Axent.Extensions.AspNetCore;
@@ -12,7 +11,9 @@ public static class ResponseExtensions
         if (response.IsSuccess)
         {
             if (typeof(T) == typeof(Unit) || response.Value is null)
+            {
                 return Results.NoContent();
+            }
 
             return Results.Ok(response.Value);
         }

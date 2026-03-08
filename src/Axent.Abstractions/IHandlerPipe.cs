@@ -1,4 +1,4 @@
-﻿namespace Axent.Abstractions;
+namespace Axent.Abstractions;
 
 #pragma warning disable S2326
 // ReSharper disable once UnusedTypeParameter

@@ -1,4 +1,4 @@
-﻿namespace Axent.Abstractions;
+namespace Axent.Abstractions;
 
 // ReSharper disable once UnusedTypeParameter
 public interface IRequest<out TResponse>;

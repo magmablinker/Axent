@@ -1,4 +1,4 @@
-﻿namespace Axent.Core.DependencyInjection;
+namespace Axent.Core.DependencyInjection;
 
 /// <summary>
 /// Configures error handling behavior within the Axent pipeline.

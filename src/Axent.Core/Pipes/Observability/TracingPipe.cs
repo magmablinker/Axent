@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Axent.Abstractions;
 
 namespace Axent.Core.Pipes.Observability;
@@ -36,5 +36,5 @@ internal sealed class TracingPipe<TRequest, TResponse> : IAxentPipe<TRequest, TR
 
 internal static class Tracing
 {
-    public static readonly ActivitySource ActivitySource = new (ActivityTags.ActivityId);
+    public static readonly ActivitySource ActivitySource = new(ActivityTags.ActivityId);
 }
