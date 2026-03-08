@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>Axent.Templates</PackageId>
+    <PackageType>Template</PackageType>
+    <PackageTags>dotnet-new</PackageTags>
+    <ContentTargetFolders>content</ContentTargetFolders>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\Axent.Templates.MinimalApi\**\*.*" Pack="true" PackagePath="content"
+             Exclude="..\Axent.Templates.MinimalApi\**\bin\**;..\Axent.Templates.MinimalApi\**\obj\**;..\Axent.Templates.MinimalApi\**\.vs\**;..\Axent.Templates.MinimalApi\**\.git\**;" />
+    <Content Include="..\Axent.Templates.MinimalApi\.template.config\**\*.*" Pack="true" PackagePath="content/.template.config" />
+    <Compile Remove="**\*" />
+  </ItemGroup>
+
+</Project>

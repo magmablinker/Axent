@@ -1,0 +1,33 @@
+﻿{
+  "$schema": "https://json.schemastore.org/template",
+  "author": "magmablinker",
+  "classifications": [ "Web", "ASP.NET", "API", "Minimal API", "CQRS", "Axent" ],
+  "identity": "Axent.Templates.MinimalApi",
+  "groupIdentity": "Axent.Templates.MinimalApi",
+  "name": "Axent Minimal API",
+  "shortName": "axent-api",
+  "sourceName": "Axent.Templates.MinimalApi",
+  "preferNameDirectory": true,
+  "description": "An ASP.NET Core Web API project pre-configured with Axent",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "primaryOutputs": [
+    {
+      "path": "Axent.Templates.MinimalApi.csproj"
+    }
+  ],
+  "postActions": [
+    {
+      "actionId": "210D431B-A78B-4D2F-B762-4ED3E3EA9025",
+      "description": "Restore NuGet packages required by this project.",
+      "continueOnError": true,
+      "manualInstructions": [
+        {
+          "text": "Run 'dotnet restore'"
+        }
+      ]
+    }
+  ]
+}
