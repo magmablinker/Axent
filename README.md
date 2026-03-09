@@ -2,9 +2,9 @@
 
 ![Axent Logo](https://raw.githubusercontent.com/magmablinker/Axent/refs/heads/main/misc/axent-logo.svg)
 
+[![Build Status](https://github.com/magmablinker/Axent/workflows/CI/badge.svg)](https://github.com/magmablinker/Axent/actions?query=workflow%3ACI)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Core)](https://www.nuget.org/packages/Axent.Core)
 [![Downloads](https://img.shields.io/nuget/dt/Axent.Core.svg)](https://www.nuget.org/packages/Axent.Core/)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/magmablinker/Axent/pr.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=magmablinker_Axent&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=magmablinker_Axent)
 [![License](https://img.shields.io/badge/license-APACHE-blue)](LICENSE)
 
@@ -34,8 +34,6 @@
 ## Prerequisites
 
 - .NET 8 or later
-
----
 
 ## 🚀 Getting Started
 
