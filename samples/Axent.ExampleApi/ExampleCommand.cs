@@ -2,7 +2,7 @@ using Axent.Abstractions;
 
 namespace Axent.ExampleApi;
 
-internal sealed class ExampleCommand : ICommand<ExampleResponse>
+public sealed class ExampleCommand : ICommand<ExampleResponse>
 {
     public required string Message { get; init; }
 }
@@ -12,13 +12,13 @@ internal sealed class ExampleResponse
     public required string Message { get; init; }
 }
 
-internal sealed class ExampleRequestHandler : IRequestHandler<ExampleCommand, ExampleResponse>
+internal sealed class ExampleCommandHandler : IRequestHandler<ExampleCommand, ExampleResponse>
 {
     private static readonly Random Random = new();
 
-    private readonly ILogger<ExampleRequestHandler> _logger;
+    private readonly ILogger<ExampleCommandHandler> _logger;
 
-    public ExampleRequestHandler(ILogger<ExampleRequestHandler> logger)
+    public ExampleCommandHandler(ILogger<ExampleCommandHandler> logger)
     {
         _logger = logger;
     }

@@ -20,12 +20,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
 
-    <None Include="..\..\misc\axent-nuget-icon.png">
+    <None Include="..\..\logo\axent-nuget-icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

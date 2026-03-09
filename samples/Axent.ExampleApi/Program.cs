@@ -2,12 +2,17 @@ using Axent.Abstractions;
 using Axent.Core.DependencyInjection;
 using Axent.ExampleApi;
 using Axent.Extensions.AspNetCore;
+using Axent.Extensions.FluentValidation;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddValidatorsFromAssemblyContaining<ExampleCommandValidator>();
+
 builder.Services.AddAxent(o => builder.Configuration.Bind("AppSettings:Axent", o))
+    .AddHandlersFromAssemblyContaining<ExampleCommandHandler>()
     .AddTracing()
-    .AddRequestHandlersFromAssemblyContaining<ExampleRequestHandler>()
+    .AddAutoFluentValidation()
     .AddPipe<OtherRequestPipe>()
     .AddPipe(typeof(ExampleRequestPipe<,>));
 
@@ -23,7 +28,7 @@ app.MapGet("/api/example", async (ISender sender, CancellationToken cancellation
 {
     var request = new ExampleCommand
     {
-        Message = "Hello World!"
+        Message = "Hello Wooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooorld!"
     };
 
     var response = await sender.SendAsync(request, cancellationToken);

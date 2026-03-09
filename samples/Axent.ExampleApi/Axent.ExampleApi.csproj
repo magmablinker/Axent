@@ -3,11 +3,15 @@
     <IsPackable>false</IsPackable>
 	  <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Axent.Abstractions\Axent.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\Axent.Core\Axent.Core.csproj" />
     <ProjectReference Include="..\..\src\Axent.Extensions.AspNetCore\Axent.Extensions.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\Axent.Extensions.FluentValidation\Axent.Extensions.FluentValidation.csproj" />
     <ProjectReference Include="..\..\src\Axent.Generators\Axent.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

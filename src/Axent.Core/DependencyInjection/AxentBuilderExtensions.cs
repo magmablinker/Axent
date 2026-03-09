@@ -1,5 +1,6 @@
 using System.Reflection;
 using Axent.Abstractions;
+using Axent.Core.Factories;
 using Axent.Core.Pipes.Observability;
 using Axent.Core.Pipes.Transactions;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +22,7 @@ public static class AxentBuilderExtensions
 
         if (options.Transactions.UseTransactions)
         {
-            builder.AddTransactionPipe();
+            builder.AddTransactions();
         }
 
         if (options.ErrorHandling is not null)
@@ -60,7 +61,7 @@ public static class AxentBuilderExtensions
         return builder;
     }
 
-    public static AxentBuilder AddRequestHandlersFromAssemblyContaining<THandler>(this AxentBuilder builder) where THandler : IRequestHandler
+    public static AxentBuilder AddHandlersFromAssemblyContaining<THandler>(this AxentBuilder builder) where THandler : IRequestHandler
     {
         return builder.AddRequestHandlersFromAssembly(typeof(THandler).Assembly);
     }
@@ -110,12 +111,14 @@ public static class AxentBuilderExtensions
 
     public static AxentBuilder AddTracing(this AxentBuilder builder)
     {
+        builder.Services.AddSingleton<IActivityFactory, ActivityFactory>();
         builder.AddPipe(typeof(TracingPipe<,>));
         return builder;
     }
 
-    private static void AddTransactionPipe(this AxentBuilder builder)
+    private static void AddTransactions(this AxentBuilder builder)
     {
+        builder.Services.AddSingleton<ITransactionScopeFactory, TransactionScopeFactory>();
         builder.Services.AddScoped(typeof(ITransactionPipe<,>), typeof(TransactionPipe<,>));
     }
 }

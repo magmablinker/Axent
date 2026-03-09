@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <PackageId>Axent.Templates</PackageId>
     <PackageType>Template</PackageType>
@@ -14,5 +13,4 @@
              Exclude="..\Axent.Templates.MinimalApi\**\bin\**;..\Axent.Templates.MinimalApi\**\obj\**;..\Axent.Templates.MinimalApi\**\.vs\**;..\Axent.Templates.MinimalApi\**\.git\**;" />
     <Compile Remove="**\*" />
   </ItemGroup>
-
 </Project>

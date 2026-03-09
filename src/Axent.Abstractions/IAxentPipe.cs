@@ -4,6 +4,7 @@ namespace Axent.Abstractions;
 /// Marker interface for Axent pipeline pipes.
 /// Do not implement it
 /// </summary>
+[System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
 public interface IAxentPipe { }
 
 public interface IAxentPipe<TRequest, TResponse> : IAxentPipe

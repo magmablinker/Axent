@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Axent.Extensions.FluentValidation\Axent.Extensions.FluentValidation.csproj" />
+    <ProjectReference Include="..\Axent.Tests.Shared\Axent.Tests.Shared.csproj" />
+  </ItemGroup>
+</Project>

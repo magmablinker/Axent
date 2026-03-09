@@ -1,6 +1,6 @@
 using Axent.Abstractions;
 
-namespace Axent.Core;
+namespace Axent.Core.Factories;
 
 internal sealed class RequestContextFactory : IRequestContextFactory
 {

@@ -1,6 +1,4 @@
 using System.Net;
-using System.Reflection;
-using System.Runtime.InteropServices.JavaScript;
 using Axent.Abstractions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Xunit;
@@ -10,30 +8,21 @@ namespace Axent.Extensions.AspNetCore.UnitTests;
 public sealed class ResponseExtensionsTest
 {
     [Fact]
-    public void ToResult_Should_Map_All_ErrorDefaults()
+    public void ToResult_should_map_validation_problem_details()
     {
         // Arrange
-        var errorFactoryMethods = typeof(ErrorDefaults.Generic)
-            .GetMethods(BindingFlags.Public | BindingFlags.Static)
-            .Where(m => m.ReturnType == typeof(JSType.Error));
+        var response = Response.Failure<string>(ErrorDefaults.Generic.ValidationFailure());
 
-        foreach (var method in errorFactoryMethods)
-        {
-            var error = (Error)method.Invoke(null, null)!;
-            var response = Response.Failure<Unit>(error);
+        // Act
+        var result = response.ToResult();
 
-            // Act
-            var result = response.ToResult();
+        // Assert
+        var problem = Assert.IsType<ProblemHttpResult>(result);
+        var status = (HttpStatusCode)problem.StatusCode;
 
-            // Assert
-            var problem = Assert.IsType<ProblemHttpResult>(result);
-
-            var status = (HttpStatusCode)problem.StatusCode;
-
-            Assert.NotEqual(
-                HttpStatusCode.InternalServerError,
-                status
-            );
-        }
+        Assert.Equal(
+            HttpStatusCode.BadRequest,
+            status
+        );
     }
 }
