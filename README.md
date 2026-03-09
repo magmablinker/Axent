@@ -55,25 +55,24 @@ builder.Services.AddAxent()
 - IRequestHandler<TRequest, TResponse> to handle them
 
 ```csharp
-using Axent.Abstractions;
+using Axent.Abstractions.Models;
+using Axent.Abstractions.Requests;
+using Axent.Abstractions.Services;
 
 namespace Axent.ExampleApi;
 
-internal sealed class ExampleQuery : IQuery
-{
-    public required string Message { get; init; }
-}
+internal sealed record ExampleQuery(string Message) : IQuery<Unit>;
 
-internal sealed class ExampleQueryHandler : IRequestHandler
+internal sealed class ExampleQueryHandler : IRequestHandler<ExampleQuery, Unit>
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<ExampleQueryHandler> _logger;
 
-    public ExampleQueryHandler(ILogger logger)
+    public ExampleQueryHandler(ILogger<ExampleQueryHandler> logger)
     {
         _logger = logger;
     }
 
-    public ValueTask<Response> HandleAsync(RequestContext context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<Unit>> HandleAsync(RequestContext<ExampleQuery> context, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Message from request '{Message}'", context.Request.Message);
         return ValueTask.FromResult(Response.Success(Unit.Value));
@@ -87,7 +86,7 @@ Inject ISender into endpoints or application services.
 ```csharp
 app.MapGet("/api/example", async (ISender sender, CancellationToken cancellationToken) =>
 {
-    var response = await sender.SendAsync(new ExampleQuery { Message = "Hello World!" }, cancellationToken);
+    var response = await sender.SendAsync(new ExampleQuery("Hello World!"), cancellationToken);
     return response.ToResult();
 });
 ```
