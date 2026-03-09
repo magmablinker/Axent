@@ -1,4 +1,4 @@
-﻿using Axent.Abstractions;
+using Axent.Abstractions;
 
 namespace Axent.Templates.MinimalApi.UseCases.Welcome;
 

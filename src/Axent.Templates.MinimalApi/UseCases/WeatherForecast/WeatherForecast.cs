@@ -1,6 +1,7 @@
-﻿namespace Axent.Templates.MinimalApi.UseCases.Welcome;
+namespace Axent.Templates.MinimalApi.UseCases.Welcome;
 
-internal sealed class WeatherForecast {
+internal sealed class WeatherForecast
+{
     public required DateTime Date { get; init; }
 
     public required int TemperatureC { get; init; }
