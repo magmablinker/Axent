@@ -1,6 +1,6 @@
 # Axent
 
-![Axent Logo](https://raw.githubusercontent.com/magmablinker/Axent/refs/heads/main/docs/axent-logo.svg)
+![Axent Logo](https://raw.githubusercontent.com/magmablinker/Axent/refs/heads/main/docs/img/axent-logo.svg)
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/magmablinker/axent/publish-nuget.yml)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Core)](https://www.nuget.org/packages/Axent.Core)
