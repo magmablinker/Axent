@@ -8,6 +8,8 @@ public sealed class Error : IEquatable<Error>
     public HttpStatusCode StatusCode { get; }
     public List<string> Messages { get; }
 
+    public Dictionary<string, List<string>> ValidationErrors { get; }
+
     private readonly int _hashCode;
 
     public Error(string identifier, HttpStatusCode statusCode, params string[] messages)
@@ -15,6 +17,7 @@ public sealed class Error : IEquatable<Error>
         Identifier = identifier;
         StatusCode = statusCode;
         Messages = messages.ToList();
+        ValidationErrors = new Dictionary<string, List<string>>();
         _hashCode = HashCode.Combine(identifier);
     }
 
@@ -41,6 +44,18 @@ public sealed class Error : IEquatable<Error>
         return this;
     }
 
+    public Error AddValidationErrors(KeyValuePair<string, IEnumerable<string>> kvp)
+    {
+        if (!ValidationErrors.TryGetValue(kvp.Key, out var errors))
+        {
+            errors = [];
+            ValidationErrors[kvp.Key] = errors;
+        }
+        errors.AddRange(kvp.Value);
+
+        return this;
+    }
+    
     public Dictionary<string, string[]> ToDictionary() =>
         new() { { Identifier, Messages.ToArray() } };
 

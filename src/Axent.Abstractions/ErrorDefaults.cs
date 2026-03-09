@@ -26,5 +26,8 @@ public static class ErrorDefaults
 
         public static Error InternalServerError() =>
             new($"{nameof(Generic)}.{nameof(InternalServerError)}", HttpStatusCode.InternalServerError);
+
+        public static Error ValidationFailure() => new($"{nameof(Generic)}.{nameof(ValidationFailure)}", HttpStatusCode.BadRequest);
+
     }
 }

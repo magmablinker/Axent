@@ -5,6 +5,7 @@
 [![NuGet](https://img.shields.io/nuget/v/Axent.Abstractions?label=Axent.Abstractions)](https://www.nuget.org/packages/Axent.Abstractions)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Core?label=Axent.Core)](https://www.nuget.org/packages/Axent.Core)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Extensions.AspNetCore?label=Axent.Extensions.AspNetCore)](https://www.nuget.org/packages/Axent.Extensions.AspNetCore)
+[![NuGet](https://img.shields.io/nuget/v/Axent.Extensions.FluentValidation?label=Axent.Extensions.FluentValidation)](https://www.nuget.org/packages/Axent.Extensions.FluentValidation)
 [![Downloads](https://img.shields.io/nuget/dt/Axent.Core.svg)](https://www.nuget.org/packages/Axent.Core/)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/magmablinker/Axent/pr.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=magmablinker_Axent&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=magmablinker_Axent)
@@ -45,8 +46,8 @@
 
 #### 1. Install Packages
 ```shell
-dotnet add package Axent.Core --version 1.2.0
-dotnet add package Axent.Extensions.AspNetCore --version 1.2.0
+dotnet add package Axent.Core --version 1.2.1
+dotnet add package Axent.Extensions.AspNetCore --version 1.2.1
 ```
 
 #### 2. Register Services
@@ -209,6 +210,44 @@ builder.Services.AddAxent(options =>
 | `Transactions.TransactionOptions`              | Isolation level and timeout settings.                                                                                                        | `ReadCommitted`, 180s |
 | `Transactions.TransactionScopeOption`          | Interaction with ambient transactions.                                                                                                       | `Required`            |
 | `Transactions.TransactionScopeAsyncFlowOption` | Controls async transaction flow.                                                                                                             | `Enabled`             |
+
+---
+
+## FluentValidation Support
+Axent can automatically validate requests by using [FluentValidation](https://github.com/FluentValidation/FluentValidation) in the pipeline.  
+If a validator exists for a request, it is executed before the remaining pipes and the handler.
+
+1. Install the packages
+```shell
+dotnet add package Axent.Extensions.FluentValidation --version 1.2.1
+dotnet add package FluentValidation.DependencyInjectionExtensions --version 12.1.1
+```
+> `FluentValidation.DependencyInjectionExtensions` is optional. It is only needed if you want to register validators through assembly scanning.
+
+2. Create a validator
+```csharp
+public sealed class ExampleCommandValidator : AbstractValidator<ExampleCommand>
+{
+    public ExampleCommandValidator()
+    {
+        RuleFor(r => r.Message)
+            .NotEmpty()
+            .MaximumLength(20);
+    }
+}
+```
+> Validators must be public when they are discovered via assembly scanning.
+
+3. Register validators and enable FluentValidation
+```csharp
+builder.Services.AddValidatorsFromAssemblyContaining<ExampleCommandValidator>();
+
+builder.Services.AddAxent()
+    .AddHandlersFromAssemblyContaining<ExampleCommandHandler>()
+    .AddAutoFluentValidation();
+```
+
+Once configured, Axent will automatically run the validator for the incoming request and stop pipeline execution early if validation fails.
 
 ---
 

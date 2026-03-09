@@ -34,9 +34,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{593F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{32769E30-B078-4790-9CD3-916B84856591}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\publish-nuget.yml = .github\workflows\publish-nuget.yml
-		.github\workflows\pr.yml = .github\workflows\pr.yml
 		.github\workflows\main-analysis.yml = .github\workflows\main-analysis.yml
+		.github\workflows\pr.yml = .github\workflows\pr.yml
+		.github\workflows\publish-nuget.yml = .github\workflows\publish-nuget.yml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Generators", "src\Axent.Generators\Axent.Generators.csproj", "{23A3BB78-4694-FAEB-4B32-08FC44254EC9}"
@@ -52,6 +52,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Templates.MinimalApi", "src\Axent.Templates.MinimalApi\Axent.Templates.MinimalApi.csproj", "{A9FBF18F-C63C-4925-A72C-AFB500969C26}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Templates", "src\Axent.Templates\Axent.Templates.csproj", "{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Extensions.FluentValidation", "src\Axent.Extensions.FluentValidation\Axent.Extensions.FluentValidation.csproj", "{19A88432-3EEA-478F-A728-009F5DD39174}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +101,10 @@ Global
 		{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19A88432-3EEA-478F-A728-009F5DD39174}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19A88432-3EEA-478F-A728-009F5DD39174}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19A88432-3EEA-478F-A728-009F5DD39174}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19A88432-3EEA-478F-A728-009F5DD39174}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -117,6 +123,7 @@ Global
 		{FFB58353-D2AE-49D6-A48E-4613FDA8E1BB} = {D4C5F6EB-2F81-47D0-875D-353E24BE2303}
 		{A9FBF18F-C63C-4925-A72C-AFB500969C26} = {3DE3CE73-CD6A-484A-95F1-D977EB1628BF}
 		{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92} = {3DE3CE73-CD6A-484A-95F1-D977EB1628BF}
+		{19A88432-3EEA-478F-A728-009F5DD39174} = {3DE3CE73-CD6A-484A-95F1-D977EB1628BF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {22A40C2C-CE32-478C-BCAD-E82586AFFE5A}

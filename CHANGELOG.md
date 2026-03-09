@@ -4,6 +4,7 @@
 
 ### Features Added
 - Add `dotnet new axent-api` template for easier setup
+- Add `Axent.Extensions.FluentValidation` for validation
 
 ## [1.2.0]
 
