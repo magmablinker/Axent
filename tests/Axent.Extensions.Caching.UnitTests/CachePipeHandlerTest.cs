@@ -1,4 +1,4 @@
-﻿using Axent.Abstractions.Builders;
+using Axent.Abstractions.Builders;
 using Axent.Abstractions.Services;
 using Axent.Tests.Shared;
 using Microsoft.Extensions.DependencyInjection;

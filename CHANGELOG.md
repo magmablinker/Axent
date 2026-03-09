@@ -1,9 +1,14 @@
 # Changelog
 
-## [1.2.12]
+## [1.2.2]
+
+### Breaking Changes
+- Adjust namespaces of `Axent.Abstractions` package
+- Change visibility of `AxentBuilder` and replace it with `IAxentBuilder`
 
 ### Features Added
 - Add `Axent.Extensions.Authorization` for request authorization
+- Add `Axent.Extensions.Caching` for response caching
 
 ## [1.2.1]
 

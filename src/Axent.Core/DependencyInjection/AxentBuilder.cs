@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Axent.Core.DependencyInjection;
 
-public sealed class AxentBuilder : IAxentBuilder
+internal sealed class AxentBuilder : IAxentBuilder
 {
     public IServiceCollection Services { get; }
 

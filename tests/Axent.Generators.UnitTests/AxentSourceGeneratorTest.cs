@@ -27,7 +27,7 @@ public sealed class AxentSourceGeneratorTests
                 MetadataReference.CreateFromFile(typeof(Core.DependencyInjection.AxentOptions).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.DependencyInjection.IServiceCollection).Assembly.Location),
             ],
-            new (OutputKind.DynamicallyLinkedLibrary));
+            new(OutputKind.DynamicallyLinkedLibrary));
 
         var generator = new AxentSourceGenerator();
         var driver = CSharpGeneratorDriver

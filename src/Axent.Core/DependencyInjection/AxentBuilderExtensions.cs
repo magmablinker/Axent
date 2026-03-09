@@ -119,7 +119,7 @@ public static class AxentBuilderExtensions
 
         var allTypes = assemblies.SelectMany(a => a.GetTypes())
             .ToList();
-        var sender = allTypes.First(t => t is { IsAbstract: false, IsInterface: false} && senderType.IsAssignableFrom(t));
+        var sender = allTypes.First(t => t is { IsAbstract: false, IsInterface: false } && senderType.IsAssignableFrom(t));
         builder.Services.AddScoped(senderType, sender);
 
         foreach (var type in allTypes.Where(t => t is { IsAbstract: false, IsInterface: false }))

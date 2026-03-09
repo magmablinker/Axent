@@ -1,7 +1,6 @@
 using Axent.Abstractions.Builders;
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Services;
-using Axent.Core.DependencyInjection;
 using Axent.Tests.Shared;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
