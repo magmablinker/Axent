@@ -2,7 +2,7 @@
 
 ![Axent Logo](https://raw.githubusercontent.com/magmablinker/Axent/refs/heads/main/misc/axent-logo.svg)
 
-[![Build Status](https://github.com/magmablinker/Axent/workflows/publish-nuget/badge.svg)](https://github.com/magmablinker/Axent/actions?query=workflow%3Apublish-nuget)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/magmablinker/axent/publish-nuget.yml)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Core)](https://www.nuget.org/packages/Axent.Core)
 [![Downloads](https://img.shields.io/nuget/dt/Axent.Core.svg)](https://www.nuget.org/packages/Axent.Core/)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=magmablinker_Axent&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=magmablinker_Axent)
