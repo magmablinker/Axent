@@ -1,6 +1,6 @@
 # Axent
 
-![Axent Logo](https://raw.githubusercontent.com/magmablinker/Axent/refs/heads/main/misc/axent-logo.svg)
+![Axent Logo](https://raw.githubusercontent.com/magmablinker/Axent/refs/heads/main/docs/axent-logo.svg)
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/magmablinker/axent/publish-nuget.yml)
 [![NuGet](https://img.shields.io/nuget/v/Axent.Core)](https://www.nuget.org/packages/Axent.Core)
@@ -100,7 +100,7 @@ dotnet new axent-api
 ```
 
 ## 📖 Docs
-To learn more about the features of Axent, checkout the [docs folder](https://github.com/magmablinker/Axent/tree/main/docs)
+To learn more about the features of Axent, checkout the [documentation](https://github.com/magmablinker/Axent/tree/main/docs)
 
 ## 📊 Benchmarks
 

@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>Axent.Abstractions</PackageId>
-    </PropertyGroup>
+  <PropertyGroup>
+      <PackageId>Axent.Abstractions</PackageId>
+  </PropertyGroup>
 </Project>

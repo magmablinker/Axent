@@ -2,9 +2,11 @@
   <PropertyGroup>
     <PackageId>Axent.Extensions.FluentValidation</PackageId>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.1.1" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Axent.Abstractions\Axent.Abstractions.csproj" />
     <ProjectReference Include="..\Axent.Core\Axent.Core.csproj" />
