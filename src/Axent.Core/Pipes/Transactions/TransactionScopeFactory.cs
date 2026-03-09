@@ -12,7 +12,6 @@ internal sealed class TransactionScopeFactory : ITransactionScopeFactory
         _options = options.Transactions;
     }
 
-
     public TransactionScope Create()
     {
         return new TransactionScope(_options.TransactionScopeOption,

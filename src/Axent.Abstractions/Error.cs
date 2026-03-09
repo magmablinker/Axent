@@ -55,7 +55,7 @@ public sealed class Error : IEquatable<Error>
 
         return this;
     }
-    
+
     public Dictionary<string, string[]> ToDictionary() =>
         new() { { Identifier, Messages.ToArray() } };
 
