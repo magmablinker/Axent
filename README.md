@@ -6,7 +6,6 @@
 [![NuGet](https://img.shields.io/nuget/v/Axent.Core)](https://www.nuget.org/packages/Axent.Core)
 [![Downloads](https://img.shields.io/nuget/dt/Axent.Core.svg)](https://www.nuget.org/packages/Axent.Core/)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=magmablinker_Axent&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=magmablinker_Axent)
-[![License](https://img.shields.io/badge/license-APACHE-blue)](LICENSE)
 
 **Axent** is a lightweight, high-performance .NET library for implementing the CQRS pattern with minimal boilerplate. It provides a source-generated, typed request/response pipeline — currently ~2x faster than [MediatR (v12.5)](https://github.com/LuckyPennySoftware/MediatR) with fewer allocations.
 
@@ -36,8 +35,6 @@
 - .NET 8 or later
 
 ## 🚀 Getting Started
-
-### Manual Installation
 
 #### 1. Install Packages
 ```shell
@@ -96,155 +93,11 @@ app.MapGet("/api/example", async (ISender sender, CancellationToken cancellation
 ```
 ---
 
-### Or alternatively using the template
+Alternatively using the template
 ```shell
 dotnet new install Axent.Templates.MinimalApi
 dotnet new axent-api
 ```
-
----
-
-## 🔁 Pipelines
-Pipelines allow you to add cross-cutting behavior such as:
-
-- Logging
-- Validation
-- Metrics
-- Authorization
-- Caching
-
-Implement
-```csharp
-IAxentPipe<TRequest, TResponse>
-```
-
-Pipes are executed in registration order before the handler.
-
-### 🌐 Generic Pipe
-Runs for all request types.
-```csharp
-internal sealed class LoggingPipe : IAxentPipe
-{
-    private readonly ILogger<LoggingPipe> _logger;
-
-    public LoggingPipe(ILogger<LoggingPipe> logger)
-    {
-        _logger = logger;
-    }
-
-    public ValueTask<Response> ProcessAsync(IPipelineChain chain, RequestContext context, CancellationToken cancellationToken = default)
-    {
-        _logger.LogInformation("Handling {Request}", typeof(TRequest).Name);
-        return chain.NextAsync(context, cancellationToken);
-    }
-}
-```
-#### Registration
-```csharp
-builder.Services.AddAxent()
-    .AddRequestHandlers(AssemblyProvider.Current)
-    .AddPipe(typeof(LoggingPipe));
-```
-
-### 🎯 Request Specific Pipe
-Runs only for a single request type.
-```csharp
-internal sealed class OtherRequestPipe : IAxentPipe
-{
-    private readonly ILogger _logger;
-
-    public OtherRequestPipe(ILogger logger)
-    {
-        _logger = logger;
-    }
-
-    public ValueTask<Response> ProcessAsync(IPipelineChain chain, RequestContext context, CancellationToken cancellationToken = default)
-    {
-        _logger.LogInformation("Running pipe for OtherRequest");
-        return chain.NextAsync(context, cancellationToken);
-    }
-}
-```
-
-#### Registration
-```csharp
-builder.Services.AddAxent()
-    .AddRequestHandlers(AssemblyProvider.Current)
-    .AddPipe();
-```
-
----
-
-## ⚙️ Configuration
-Customize behavior via AxentOptions.
-```csharp
-builder.Services.AddAxent(options =>
-{
-    options.ErrorHandling = new AxentErrorHandlingOptions
-    {
-        EnableDetailedExceptionResponse = false
-    };
-
-    options.Logging = new AxentLoggingOptions
-    {
-        EnableRequestLogging = true
-    };
-
-    options.Transactions = new AxentTransactionOptions
-    {
-        UseTransactions = true
-    };
-});
-```
-
-| Option                                         | Description                                                                                                                                  | Default               |
-|------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|
-| `ErrorHandling`                                | Enables pipeline exception handling. EnableDetailedExceptionResponse includes exception details in responses. If null, exceptions propagate. | `null`                |
-| `Logging.EnableRequestLogging`                 | Logs the full request object via `ILogger` before processing. Avoid in production if requests contain sensitive data.                        | `false`               |
-| `Transactions.UseTransactions`                 | Wraps `ICommand` handlers in a TransactionScope. Has no effect on `IQuery` handlers.                                                         | `true`                |
-| `Transactions.TransactionOptions`              | Isolation level and timeout settings.                                                                                                        | `ReadCommitted`, 180s |
-| `Transactions.TransactionScopeOption`          | Interaction with ambient transactions.                                                                                                       | `Required`            |
-| `Transactions.TransactionScopeAsyncFlowOption` | Controls async transaction flow.                                                                                                             | `Enabled`             |
-
----
-
-## FluentValidation Support
-Axent can automatically validate requests by using [FluentValidation](https://github.com/FluentValidation/FluentValidation) in the pipeline.  
-If a validator exists for a request, it is executed before the remaining pipes and the handler.
-
-1. Install the packages
-```shell
-dotnet add package Axent.Extensions.FluentValidation --version 1.2.1
-dotnet add package FluentValidation.DependencyInjectionExtensions --version 12.1.1
-```
-> `FluentValidation.DependencyInjectionExtensions` is optional. It is only needed if you want to register validators through assembly scanning.
-
-2. Create a validator
-```csharp
-public sealed class ExampleCommandValidator : AbstractValidator<ExampleCommand>
-{
-    public ExampleCommandValidator()
-    {
-        RuleFor(r => r.Message)
-            .NotEmpty()
-            .MaximumLength(20);
-    }
-}
-```
-> Validators must be public when they are discovered via assembly scanning.
-
-3. Register validators and enable FluentValidation
-```csharp
-builder.Services.AddValidatorsFromAssemblyContaining<ExampleCommandValidator>();
-
-builder.Services.AddAxent()
-    .AddHandlersFromAssemblyContaining<ExampleCommandHandler>()
-    .AddAutoFluentValidation();
-```
-
-Once configured, Axent will automatically run the validator for the incoming request and stop pipeline execution early if validation fails.
-
----
 
 ## 📊 Benchmarks
 

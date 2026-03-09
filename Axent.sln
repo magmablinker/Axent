@@ -46,6 +46,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Benchmark", "benchmarks\Axent.Benchmark\Axent.Benchmark.csproj", "{FED00A47-7482-4F52-A6E1-3237894E5999}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{1DAAB29E-9E90-4DB2-92A8-B7DC97D0E43F}"
+	ProjectSection(SolutionItems) = preProject
+		docs\configuration.md = docs\configuration.md
+		docs\fluent-validation.md = docs\fluent-validation.md
+		docs\pipelines.md = docs\pipelines.md
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Generators.UnitTests", "tests\Axent.Generators.UnitTests\Axent.Generators.UnitTests.csproj", "{FFB58353-D2AE-49D6-A48E-4613FDA8E1BB}"
 EndProject
