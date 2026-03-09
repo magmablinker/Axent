@@ -1,0 +1,6 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Axent.Extensions.Caching\Axent.Extensions.Caching.csproj" />
+    <ProjectReference Include="..\Axent.Tests.Shared\Axent.Tests.Shared.csproj" />
+  </ItemGroup>
+</Project>

@@ -24,10 +24,10 @@ public sealed class AxentSourceGeneratorTests
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(CancellationToken).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(ICommand<>).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Axent.Core.DependencyInjection.AxentOptions).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Core.DependencyInjection.AxentOptions).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.DependencyInjection.IServiceCollection).Assembly.Location),
             ],
-            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+            new (OutputKind.DynamicallyLinkedLibrary));
 
         var generator = new AxentSourceGenerator();
         var driver = CSharpGeneratorDriver
@@ -49,7 +49,9 @@ public sealed class AxentSourceGeneratorTests
     {
         // Arrange
         const string source = """
-            using Axent.Abstractions;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
 
             namespace TestNamespace;
 
@@ -74,7 +76,9 @@ public sealed class AxentSourceGeneratorTests
     {
         // Arrange
         const string source = """
-            using Axent.Abstractions;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
 
             namespace TestNamespace;
 
@@ -99,7 +103,9 @@ public sealed class AxentSourceGeneratorTests
     {
         // Arrange
         const string source = """
-            using Axent.Abstractions;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
 
             namespace TestNamespace;
 
@@ -143,7 +149,9 @@ public sealed class AxentSourceGeneratorTests
     {
         // Arrange
         const string source = """
-            using Axent.Abstractions;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
 
             namespace TestNamespace;
 
@@ -170,7 +178,9 @@ public sealed class AxentSourceGeneratorTests
     {
         // Arrange
         const string source = """
-            using Axent.Abstractions;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
 
             namespace TestNamespace;
 
@@ -197,7 +207,9 @@ public sealed class AxentSourceGeneratorTests
     {
         // Arrange
         const string source = """
-            using Axent.Abstractions;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
 
             namespace TestNamespace;
 
@@ -224,7 +236,9 @@ public sealed class AxentSourceGeneratorTests
     {
         // Arrange
         const string source = """
-            using Axent.Abstractions;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
 
             namespace TestNamespace;
 
@@ -252,7 +266,9 @@ public sealed class AxentSourceGeneratorTests
     {
         // Arrange
         const string source = """
-            using Axent.Abstractions;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
 
             namespace TestNamespace;
 
@@ -288,7 +304,9 @@ public sealed class AxentSourceGeneratorTests
     {
         // Arrange
         const string source = """
-            using Axent.Abstractions;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
 
             namespace TestNamespace;
 
@@ -310,7 +328,9 @@ public sealed class AxentSourceGeneratorTests
         const string source = """
             using System.Threading;
             using System.Threading.Tasks;
-            using Axent.Abstractions;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
 
             namespace TestNamespace;
 
@@ -321,7 +341,7 @@ public sealed class AxentSourceGeneratorTests
                 public ValueTask<Response<TestResponse>> HandleAsync(RequestContext<TestCommand> context, CancellationToken cancellationToken = default)
                     => ValueTask.FromResult(Response.Success(new TestResponse()));
             }
-        """;
+            """;
 
         // Act
         var (outputCompilation, _, _) = RunGenerator(source);

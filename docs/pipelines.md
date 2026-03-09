@@ -101,7 +101,7 @@ builder.Services.AddAxent()
     .AddPipe<OtherRequestPipe>();
 ```
 
-## 💡 Notes
+## 📌 Notes
 * Use generic pipes for behavior that should apply to all requests.
 * Use request-specific pipes when the behavior is only relevant for one request type.
 * Registration order matters because pipes are executed in the order they are added.

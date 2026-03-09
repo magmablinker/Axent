@@ -7,7 +7,7 @@
 [![Downloads](https://img.shields.io/nuget/dt/Axent.Core.svg)](https://www.nuget.org/packages/Axent.Core/)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=magmablinker_Axent&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=magmablinker_Axent)
 
-**Axent** is a lightweight, high-performance .NET library for implementing the CQRS pattern with minimal boilerplate. It provides a source-generated, typed request/response pipeline — currently ~2x faster than [MediatR (v12.5)](https://github.com/LuckyPennySoftware/MediatR) with fewer allocations.
+**Axent** is a source-generated CQRS library for modern .NET with typed pipelines and ASP.NET Core integration. It is currently ~2x faster than [MediatR (v12.5)](https://github.com/LuckyPennySoftware/MediatR) with fewer allocations.
 
 ---
 
@@ -38,7 +38,7 @@
 
 #### 1. Install Packages
 ```shell
-dotnet add package Axent.Core 
+dotnet add package Axent.Core
 dotnet add package Axent.Extensions.AspNetCore
 ```
 

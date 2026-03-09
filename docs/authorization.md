@@ -137,7 +137,7 @@ Typical results are:
 * 401 Unauthorized when the user is not authenticated
 * 403 Forbidden when the user is authenticated but does not meet the policy requirements
 
-## ℹ️ Notes
+## 📌  Notes
 * Authorization only applies to requests decorated with authorization attributes
 * [AllowAnonymous] always skips authorization for that request
 * Policies, roles, and custom handlers behave the same way as in ASP.NET Core

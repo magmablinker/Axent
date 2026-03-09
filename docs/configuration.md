@@ -1,5 +1,5 @@
 # ⚙️ Configuration
-Customize behavior via AxentOptions.
+Axent can be configured through `AxentOptions` when registering services.
 ```csharp
 builder.Services.AddAxent(options =>
 {
@@ -29,3 +29,9 @@ builder.Services.AddAxent(options =>
 | `Transactions.TransactionScopeOption`          | Interaction with ambient transactions.                                                                                                       | `Required`            |
 | `Transactions.TransactionScopeAsyncFlowOption` | Controls async transaction flow.                                                                                                             | `Enabled`             |
 
+## 📌 Notes
+
+* `ErrorHandling`, `Logging`, and `Transactions` are optional. If not configured, the corresponding behavior is disabled unless stated otherwise by the implementation.
+* Detailed exception responses should generally only be enabled in development environments.
+* Request logging may expose sensitive information if your request objects contain personal, financial, or security-related data.
+* Transactions are only applied to commands implementing `ICommand<TResponse>`. Queries are never executed inside a transaction by Axent.

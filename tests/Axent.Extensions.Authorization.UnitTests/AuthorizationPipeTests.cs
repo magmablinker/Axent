@@ -2,7 +2,6 @@ using System.Security.Claims;
 using Axent.Abstractions.Builders;
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Services;
-using Axent.Core.DependencyInjection;
 using Axent.Tests.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +39,7 @@ public sealed class AuthorizationPipeTests : TestBase
         _authorizationService.AuthorizeAsync(
                 principal,
                 Arg.Any<object>(),
-                Arg.Any<IEnumerable<IAuthorizationRequirement>>()) 
+                Arg.Any<IEnumerable<IAuthorizationRequirement>>())
             .Returns(AuthorizationResult.Failed());
 
         var expected = Response.Failure<Unit>(ErrorDefaults.Generic.Unauthorized());
