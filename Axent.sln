@@ -28,7 +28,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Build.props = Directory.Build.props
 		LICENSE = LICENSE
 		README.md = README.md
-		sonar-project.properties = sonar-project.properties
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{593F2757-3BE5-4184-8C80-811FB6CEF890}"
@@ -49,6 +48,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{1DAAB29E-9E90-4DB2-92A8-B7DC97D0E43F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Generators.UnitTests", "tests\Axent.Generators.UnitTests\Axent.Generators.UnitTests.csproj", "{FFB58353-D2AE-49D6-A48E-4613FDA8E1BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Templates.MinimalApi", "src\Axent.Templates.MinimalApi\Axent.Templates.MinimalApi.csproj", "{A9FBF18F-C63C-4925-A72C-AFB500969C26}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Templates", "src\Axent.Templates\Axent.Templates.csproj", "{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,6 +91,14 @@ Global
 		{FFB58353-D2AE-49D6-A48E-4613FDA8E1BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFB58353-D2AE-49D6-A48E-4613FDA8E1BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFB58353-D2AE-49D6-A48E-4613FDA8E1BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9FBF18F-C63C-4925-A72C-AFB500969C26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9FBF18F-C63C-4925-A72C-AFB500969C26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9FBF18F-C63C-4925-A72C-AFB500969C26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9FBF18F-C63C-4925-A72C-AFB500969C26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -104,6 +115,8 @@ Global
 		{FED00A47-7482-4F52-A6E1-3237894E5999} = {E3E9B34D-5520-4976-93A0-31F650034446}
 		{1DAAB29E-9E90-4DB2-92A8-B7DC97D0E43F} = {CF63ABDF-FF8E-4EEE-90C3-E1C7C2F5BF26}
 		{FFB58353-D2AE-49D6-A48E-4613FDA8E1BB} = {D4C5F6EB-2F81-47D0-875D-353E24BE2303}
+		{A9FBF18F-C63C-4925-A72C-AFB500969C26} = {3DE3CE73-CD6A-484A-95F1-D977EB1628BF}
+		{0BB55CAD-C25A-409C-87F1-6C29C8C6FE92} = {3DE3CE73-CD6A-484A-95F1-D977EB1628BF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {22A40C2C-CE32-478C-BCAD-E82586AFFE5A}

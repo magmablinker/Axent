@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.1]
+
+### Features Added
+- Add `dotnet new axent-api` template for easier setup
+
 ## [1.2.0]
 
 ### Breaking Changes

@@ -6,10 +6,13 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Version>$(Version)</Version>
     <Authors>magmablinker</Authors>
+    <Title>Axent</Title>
     <Description>A simple performance focused CQRS library.</Description>
+    <Copyright>© 2026 Axent Developers</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>axent-nuget-icon.png</PackageIcon>
+    <PackageTags>cqrs;aspnetcore;mediatr;csharp-sourcegenerator;mediator;mediator-pattern;</PackageTags>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <RepositoryUrl>https://github.com/magmablinker/Axent</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

@@ -41,19 +41,21 @@
 
 ## 🚀 Getting Started
 
-### 1. Install Packages
+### Manual Installation
+
+#### 1. Install Packages
 ```shell
 dotnet add package Axent.Core --version 1.2.0
 dotnet add package Axent.Extensions.AspNetCore --version 1.2.0
 ```
 
-### 2. Register Services
+#### 2. Register Services
 ```csharp
 builder.Services.AddAxent()
     .AddRequestHandlers(AssemblyProvider.Current);
 ```
 
-### 3. Create a Request and Handler
+#### 3. Create a Request and Handler
 - IQuery<TResponse> for read operations
 - ICommand<TResponse> for write operations
 - IRequest<TResponse> if you don't want to differentiate
@@ -86,7 +88,7 @@ internal sealed class ExampleQueryHandler : IRequestHandler
 }
 ```
 
-### 4. Send a Request
+#### 4. Send a Request
 Inject ISender into endpoints or application services.
 
 ```csharp
@@ -95,6 +97,13 @@ app.MapGet("/api/example", async (ISender sender, CancellationToken cancellation
     var response = await sender.SendAsync(new ExampleQuery { Message = "Hello World!" }, cancellationToken);
     return response.ToResult();
 });
+```
+---
+
+### Or alternatively using the template
+```shell
+dotnet new install Axent.Templates.MinimalApi
+dotnet new axent-api
 ```
 
 ---

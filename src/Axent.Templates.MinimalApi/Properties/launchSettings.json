@@ -1,11 +1,11 @@
 {
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "Axent.ExampleApi": {
+    "Axent.Templates.MinimalApi": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:7216",
+      "applicationUrl": "https://localhost:7104",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

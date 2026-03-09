@@ -9,7 +9,7 @@ internal sealed class TracingPipe<TRequest, TResponse> : IAxentPipe<TRequest, TR
 
     public async ValueTask<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
     {
-        using var activity = Tracing.ActivitySource.StartActivity(_requestType.FullName ?? _requestType.Name);
+        using var activity = Tracing.ActivitySource.StartActivity(_requestType.Name);
 
         try
         {
@@ -18,10 +18,9 @@ internal sealed class TracingPipe<TRequest, TResponse> : IAxentPipe<TRequest, TR
             activity?.SetStatus(ActivityStatusCode.Ok);
             return result;
         }
-        catch (OperationCanceledException o)
+        catch (OperationCanceledException)
         {
             activity?.SetStatus(ActivityStatusCode.Unset);
-            activity?.SetTag(ActivityTags.ExceptionType, o.GetType().FullName);
             throw;
         }
         catch (Exception e)
