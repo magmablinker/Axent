@@ -99,6 +99,9 @@ dotnet new install Axent.Templates.MinimalApi
 dotnet new axent-api
 ```
 
+## 📖 Docs
+To learn more about the features of Axent, checkout the [docs folder](https://github.com/magmablinker/Axent/tree/main/docs)
+
 ## 📊 Benchmarks
 
 ### Axent (Source Generated Dispatch)
