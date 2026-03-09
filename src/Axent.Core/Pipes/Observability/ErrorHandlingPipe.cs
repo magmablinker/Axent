@@ -27,7 +27,7 @@ public sealed class ErrorHandlingPipe<TRequest, TResponse>
         }
         catch (Exception e)
         {
-            _logger.PipelineExecutionFailed(e);
+            _logger.PipelineExecutionFailed(e, typeof(TRequest).Name);
 
             var response = ErrorDefaults.Generic.InternalServerError();
             if (_options.EnableDetailedExceptionResponse)
@@ -45,8 +45,8 @@ internal static partial class ErrorHandlingPipeLoggerExtensions
     [LoggerMessage(
         EventId = 0,
         Level = LogLevel.Error,
-        Message = "An unhandled exception occurred during the pipeline execution."),
+        Message = "An unhandled exception occurred during the pipeline execution of request '{requestType}'."),
         ]
     public static partial void PipelineExecutionFailed(
-        this ILogger logger, Exception exception);
+        this ILogger logger, Exception exception, string requestType);
 }

@@ -60,6 +60,11 @@ public static class AxentBuilderExtensions
         return builder;
     }
 
+    public static AxentBuilder AddRequestHandlersFromAssemblyContaining<THandler>(this AxentBuilder builder) where THandler : IRequestHandler
+    {
+        return builder.AddRequestHandlersFromAssembly(typeof(THandler).Assembly);
+    }
+
     public static AxentBuilder AddHandler<THandler>(this AxentBuilder builder)
         where THandler : class, IRequestHandler
     {

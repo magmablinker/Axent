@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAxent(o => builder.Configuration.Bind("AppSettings:Axent", o))
     .AddTracing()
-    .AddRequestHandlersFromAssembly(AssemblyProvider.Current)
+    .AddRequestHandlersFromAssemblyContaining<ExampleRequestHandler>()
     .AddPipe<OtherRequestPipe>()
     .AddPipe(typeof(ExampleRequestPipe<,>));
 
