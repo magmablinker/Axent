@@ -1,13 +1,13 @@
 using Axent.Abstractions;
 using Axent.Core.DependencyInjection;
 using Axent.Extensions.AspNetCore;
-using Axent.Templates.MinimalApi;
 using Axent.Templates.MinimalApi.UseCases.Welcome;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddAxent(o => builder.Configuration.Bind("Axent", o))
     .AddTracing()
-    .AddRequestHandlersFromAssembly(AssemblyProvider.Current);
+    .AddHandlersFromAssemblyContaining<WeatherForecastQueryHandler>();
 
 var app = builder.Build();
 

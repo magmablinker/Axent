@@ -4,7 +4,7 @@ namespace Axent.Templates.MinimalApi.UseCases.Welcome;
 
 internal sealed record WeatherForecastQuery : IQuery<WeatherForecast[]>;
 
-internal sealed class WelcomeQueryHandler : IRequestHandler<WeatherForecastQuery, WeatherForecast[]>
+internal sealed class WeatherForecastQueryHandler : IRequestHandler<WeatherForecastQuery, WeatherForecast[]>
 {
     private static readonly string[] _summaries =
     [
