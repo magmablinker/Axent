@@ -1,4 +1,4 @@
-using Axent.Abstractions;
+using Axent.Abstractions.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Axent.Extensions.AspNetCore;

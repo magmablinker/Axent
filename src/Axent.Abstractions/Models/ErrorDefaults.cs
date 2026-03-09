@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Axent.Abstractions;
+namespace Axent.Abstractions.Models;
 
 public static class ErrorDefaults
 {

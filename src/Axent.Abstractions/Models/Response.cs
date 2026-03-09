@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Axent.Abstractions;
+namespace Axent.Abstractions.Models;
 
 public interface IResponse
 {

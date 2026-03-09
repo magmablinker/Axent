@@ -1,4 +1,6 @@
-using Axent.Abstractions;
+using Axent.Abstractions.Models;
+using Axent.Abstractions.Pipelines;
+using Axent.Abstractions.Requests;
 
 namespace Axent.Core.Pipes.Transactions;
 

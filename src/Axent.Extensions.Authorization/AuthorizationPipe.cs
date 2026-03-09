@@ -1,4 +1,5 @@
-using Axent.Abstractions;
+using Axent.Abstractions.Models;
+using Axent.Abstractions.Pipelines;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Axent.Extensions.Authorization;

@@ -5,7 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Axent.Abstractions;
+using Axent.Abstractions.Factories;
+using Axent.Abstractions.Models;
+using Axent.Abstractions.Pipelines;
+using Axent.Abstractions.Requests;
+using Axent.Abstractions.Services;
 using Axent.Core.Pipes.Transactions;
 
 namespace Axent.Generated;
@@ -23,6 +27,9 @@ internal sealed class {{ type.symbol_name }}Pipeline : IPipeline
         {{~ if type.is_command ~}}
         , ITransactionPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>? transactionPipe = null
         {{~ end ~}}
+        {{~ if type.is_cacheable }}
+        , ICachePipe<{{ type.request_full_name }}, {{ type.response_full_name }}>? cachePipe = null
+        {{~ end ~}}
     )
     {
         _contextFactory = contextFactory;
@@ -32,6 +39,13 @@ internal sealed class {{ type.symbol_name }}Pipeline : IPipeline
         if(transactionPipe is not null)
         {
             pipeline.Add(transactionPipe);
+        }
+        {{~ end ~}}
+
+        {{~ if type.is_cacheable ~}}
+        if(cachePipe is not null)
+        {
+            pipeline.Add(cachePipe);
         }
         {{~ end ~}}
 

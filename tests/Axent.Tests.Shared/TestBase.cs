@@ -1,3 +1,4 @@
+using Axent.Abstractions.Builders;
 using Axent.Core.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,7 +31,7 @@ public abstract class TestBase
         // empty on purpose
     }
 
-    protected virtual void ConfigureAxent(AxentBuilder builder)
+    protected virtual void ConfigureAxent(IAxentBuilder builder)
     {
         // empty on purpose
     }

@@ -1,11 +1,11 @@
-using Axent.Core.DependencyInjection;
+using Axent.Abstractions.Builders;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Axent.Extensions.FluentValidation;
 
 public static class AxentBuilderExtensions
 {
-    public static AxentBuilder AddAutoFluentValidation(this AxentBuilder builder)
+    public static IAxentBuilder AddAutoFluentValidation(this IAxentBuilder builder)
     {
         builder.AddPipe(typeof(FluentValidationPipe<,>));
         builder.Services.AddSingleton<IFluentValidationErrorFactory, FluentValidationErrorFactory>();

@@ -1,5 +1,6 @@
 using System.Diagnostics;
-using Axent.Abstractions;
+using Axent.Abstractions.Builders;
+using Axent.Abstractions.Services;
 using Axent.Core.DependencyInjection;
 using Axent.Core.Pipes.Observability;
 using Axent.Tests.Shared;
@@ -24,7 +25,7 @@ public sealed class TracingHandlerPipeTest : TestBase
             .Returns(_ => _activitySource.StartActivity(string.Empty));
     }
 
-    protected override void ConfigureAxent(AxentBuilder builder)
+    protected override void ConfigureAxent(IAxentBuilder builder)
     {
         builder.AddTracing();
         builder.Services.AddSingleton(_activityFactory);

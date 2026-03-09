@@ -9,6 +9,5 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Axent.Abstractions\Axent.Abstractions.csproj" />
-    <ProjectReference Include="..\Axent.Core\Axent.Core.csproj" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Axent.Abstractions;
+namespace Axent.Abstractions.Models;
 
 public sealed class Error : IEquatable<Error>
 {

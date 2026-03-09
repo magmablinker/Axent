@@ -1,5 +1,7 @@
 using System.Security.Claims;
-using Axent.Abstractions;
+using Axent.Abstractions.Builders;
+using Axent.Abstractions.Models;
+using Axent.Abstractions.Services;
 using Axent.Core.DependencyInjection;
 using Axent.Tests.Shared;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +17,7 @@ public sealed class AuthorizationPipeTests : TestBase
     private readonly IAuthorizationPolicyProvider _policyProvider = Substitute.For<IAuthorizationPolicyProvider>();
     private readonly IPrincipalAccessor _principalAccessor = Substitute.For<IPrincipalAccessor>();
 
-    protected override void ConfigureAxent(AxentBuilder builder)
+    protected override void ConfigureAxent(IAxentBuilder builder)
     {
         builder.AddAuthorization();
 

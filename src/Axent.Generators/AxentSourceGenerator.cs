@@ -56,13 +56,16 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
 
             var responseType = @interface.TypeArguments[0];
 
-            var isCommand = @interface.OriginalDefinition.ToDisplayString() == "Axent.Abstractions.ICommand<TResponse>"
-                            || symbol.AllInterfaces.Any(i => i.OriginalDefinition.ToDisplayString() == "Axent.Abstractions.ICommand<TResponse>");
+            var isCommand = @interface.OriginalDefinition.ToDisplayString() == "Axent.Abstractions.Requests.ICommand<TResponse>"
+                            || symbol.AllInterfaces.Any(i => i.OriginalDefinition.ToDisplayString() == "Axent.Abstractions.Requests.ICommand<TResponse>");
+            var isCacheable = @interface.OriginalDefinition.ToDisplayString() == "Axent.Abstractions.Requests.ICacheableQuery<TResponse>"
+                              || symbol.AllInterfaces.Any(i => i.OriginalDefinition.ToDisplayString() == "Axent.Abstractions.Requests.ICacheableQuery<TResponse>");
             return new(
                 RequestFullName: symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 ResponseFullName: responseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
                 SymbolName: symbol.Name,
-                IsCommand: isCommand);
+                IsCommand: isCommand,
+                IsCacheable: isCacheable);
         }
 
         return null;

@@ -1,6 +1,6 @@
-namespace Axent.Abstractions;
+namespace Axent.Abstractions.Pipelines;
 
 /// <summary>
 /// Marker interface for source generator
 /// </summary>
-public interface IPipeline;
+public interface IHandlerPipe;

@@ -1,4 +1,6 @@
-namespace Axent.Abstractions;
+using Axent.Abstractions.Models;
+
+namespace Axent.Abstractions.Pipelines;
 
 public interface IPipelineChain<TRequest, TResponse>
 {

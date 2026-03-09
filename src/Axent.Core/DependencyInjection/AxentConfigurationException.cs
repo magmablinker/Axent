@@ -1,4 +1,4 @@
-using Axent.Abstractions;
+using Axent.Abstractions.Exceptions;
 
 namespace Axent.Core.DependencyInjection;
 

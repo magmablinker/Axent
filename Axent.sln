@@ -48,6 +48,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{1DAAB29E-9E90-4DB2-92A8-B7DC97D0E43F}"
 	ProjectSection(SolutionItems) = preProject
 		docs\authorization.md = docs\authorization.md
+		docs\caching.md = docs\caching.md
 		docs\configuration.md = docs\configuration.md
 		docs\fluent-validation.md = docs\fluent-validation.md
 		docs\pipelines.md = docs\pipelines.md
@@ -70,6 +71,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Extensions.Authorization", "src\Axent.Extensions.Authorization\Axent.Extensions.Authorization.csproj", "{7BB04BD3-6F3A-4F67-9F80-5E86A9D53518}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Extensions.Authorization.UnitTests", "tests\Axent.Extensions.Authorization.UnitTests\Axent.Extensions.Authorization.UnitTests.csproj", "{329A81F7-D08C-2676-0665-7CE33570E538}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Extensions.Caching", "src\Axent.Extensions.Caching\Axent.Extensions.Caching.csproj", "{EFED9EA4-7E95-4C96-8CC9-B874A13F054E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -141,6 +144,10 @@ Global
 		{329A81F7-D08C-2676-0665-7CE33570E538}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{329A81F7-D08C-2676-0665-7CE33570E538}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{329A81F7-D08C-2676-0665-7CE33570E538}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFED9EA4-7E95-4C96-8CC9-B874A13F054E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFED9EA4-7E95-4C96-8CC9-B874A13F054E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFED9EA4-7E95-4C96-8CC9-B874A13F054E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFED9EA4-7E95-4C96-8CC9-B874A13F054E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -165,6 +172,7 @@ Global
 		{7AC9DF79-6E4C-4DC9-AC7C-ADA35345DC01} = {D4C5F6EB-2F81-47D0-875D-353E24BE2303}
 		{7BB04BD3-6F3A-4F67-9F80-5E86A9D53518} = {3DE3CE73-CD6A-484A-95F1-D977EB1628BF}
 		{329A81F7-D08C-2676-0665-7CE33570E538} = {D4C5F6EB-2F81-47D0-875D-353E24BE2303}
+		{EFED9EA4-7E95-4C96-8CC9-B874A13F054E} = {3DE3CE73-CD6A-484A-95F1-D977EB1628BF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {22A40C2C-CE32-478C-BCAD-E82586AFFE5A}

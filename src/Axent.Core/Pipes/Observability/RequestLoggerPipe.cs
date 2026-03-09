@@ -1,5 +1,6 @@
 using System.Diagnostics;
-using Axent.Abstractions;
+using Axent.Abstractions.Models;
+using Axent.Abstractions.Pipelines;
 using Microsoft.Extensions.Logging;
 
 namespace Axent.Core.Pipes.Observability;

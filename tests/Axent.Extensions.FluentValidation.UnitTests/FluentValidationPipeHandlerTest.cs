@@ -1,4 +1,6 @@
-using Axent.Abstractions;
+using Axent.Abstractions.Builders;
+using Axent.Abstractions.Models;
+using Axent.Abstractions.Services;
 using Axent.Core.DependencyInjection;
 using Axent.Tests.Shared;
 using FluentValidation;
@@ -9,7 +11,7 @@ namespace Axent.Extensions.FluentValidation.UnitTests;
 
 public sealed class FluentValidationPipeHandlerTest : TestBase
 {
-    protected override void ConfigureAxent(AxentBuilder builder)
+    protected override void ConfigureAxent(IAxentBuilder builder)
     {
         builder.AddAutoFluentValidation();
         builder.Services.AddScoped<IValidator<TestCommand>, TestCommandValidator>();

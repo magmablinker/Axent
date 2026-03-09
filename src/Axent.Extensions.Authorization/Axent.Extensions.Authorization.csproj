@@ -8,6 +8,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Axent.Core\Axent.Core.csproj" />
+    <ProjectReference Include="..\Axent.Abstractions\Axent.Abstractions.csproj" />
   </ItemGroup>
 </Project>

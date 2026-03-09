@@ -1,4 +1,4 @@
-using Axent.Abstractions;
+using Axent.Abstractions.Models;
 using FluentValidation.Results;
 
 namespace Axent.Extensions.FluentValidation;

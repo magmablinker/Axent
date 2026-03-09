@@ -5,4 +5,5 @@ internal sealed record RequestTypeInfo(
     string RequestFullName,
     string ResponseFullName,
     string SymbolName,
-    bool IsCommand);
+    bool IsCommand,
+    bool IsCacheable);

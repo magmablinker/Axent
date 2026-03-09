@@ -1,5 +1,5 @@
 using System.Net;
-using Axent.Abstractions;
+using Axent.Abstractions.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Xunit;
 

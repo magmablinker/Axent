@@ -1,7 +1,8 @@
-using Axent.Abstractions;
+using Axent.Abstractions.Services;
 using Axent.Core.DependencyInjection;
 using Axent.ExampleApi;
 using Axent.Extensions.AspNetCore;
+using Axent.Extensions.Caching;
 using Axent.Extensions.FluentValidation;
 using FluentValidation;
 
@@ -13,6 +14,7 @@ builder.Services.AddAxent(o => builder.Configuration.Bind("AppSettings:Axent", o
     .AddHandlersFromAssemblyContaining<ExampleCommandHandler>()
     .AddTracing()
     .AddAutoFluentValidation()
+    .AddCache()
     .AddPipe<OtherRequestPipe>()
     .AddPipe(typeof(ExampleRequestPipe<,>));
 
@@ -37,7 +39,7 @@ app.MapGet("/api/example", async (ISender sender, CancellationToken cancellation
 
 app.MapGet("/api/other", async (ISender sender, CancellationToken cancellationToken) =>
 {
-    var request = new OtherRequest
+    var request = new OtherQuery
     {
         Message = "I'm Another Request"
     };

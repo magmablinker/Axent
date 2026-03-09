@@ -1,5 +1,6 @@
 using System.Transactions;
-using Axent.Abstractions;
+using Axent.Abstractions.Builders;
+using Axent.Abstractions.Services;
 using Axent.Core.DependencyInjection;
 using Axent.Core.Pipes.Transactions;
 using Axent.Tests.Shared;
@@ -24,7 +25,7 @@ public sealed class TransactionalHandlerTest : TestBase
         options.Transactions.UseTransactions = true;
     }
 
-    protected override void ConfigureAxent(AxentBuilder builder)
+    protected override void ConfigureAxent(IAxentBuilder builder)
     {
         builder.Services.AddSingleton(_transactionScopeFactory);
     }

@@ -1,3 +1,4 @@
+using Axent.Abstractions.Requests;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
@@ -8,7 +9,7 @@ public sealed class AxentSourceGeneratorTests
 {
     private static (Compilation Output, IReadOnlyList<Diagnostic> Diagnostics, IReadOnlyList<SyntaxTree> GeneratedTrees) RunGenerator(string source)
     {
-        _ = typeof(Abstractions.ICommand<>);
+        _ = typeof(ICommand<>);
 
         var trustedAssemblies = AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!
             .ToString()!
@@ -22,7 +23,7 @@ public sealed class AxentSourceGeneratorTests
                 ..trustedAssemblies,
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(CancellationToken).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Axent.Abstractions.ICommand<>).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(ICommand<>).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Axent.Core.DependencyInjection.AxentOptions).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Microsoft.Extensions.DependencyInjection.IServiceCollection).Assembly.Location),
             ],

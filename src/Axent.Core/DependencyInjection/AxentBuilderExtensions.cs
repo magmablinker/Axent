@@ -1,5 +1,8 @@
 using System.Reflection;
-using Axent.Abstractions;
+using Axent.Abstractions.Builders;
+using Axent.Abstractions.Factories;
+using Axent.Abstractions.Pipelines;
+using Axent.Abstractions.Services;
 using Axent.Core.Factories;
 using Axent.Core.Pipes.Observability;
 using Axent.Core.Pipes.Transactions;
@@ -16,7 +19,7 @@ public static class AxentBuilderExtensions
     /// <param name="configure">Action to configure the <see cref="AxentOptions"/></param>
     /// <param name="assemblies">Assemblies which get scanned for source generated handlers</param>
     /// <returns></returns>
-    public static AxentBuilder AddAxent(this IServiceCollection services, Action<AxentOptions>? configure = null, Assembly[]? assemblies = null)
+    public static IAxentBuilder AddAxent(this IServiceCollection services, Action<AxentOptions>? configure = null, Assembly[]? assemblies = null)
     {
         assemblies ??= AppDomain.CurrentDomain.GetAssemblies();
 
@@ -46,13 +49,11 @@ public static class AxentBuilderExtensions
 
         builder.AddSourceGeneratedServices(assemblies);
 
-
-
         return builder;
     }
 
-    public static AxentBuilder AddRequestHandlersFromAssembly(
-        this AxentBuilder builder,
+    public static IAxentBuilder AddRequestHandlersFromAssembly(
+        this IAxentBuilder builder,
         Assembly assembly)
     {
         var handlerTypes = assembly.GetTypes()
@@ -72,12 +73,12 @@ public static class AxentBuilderExtensions
         return builder;
     }
 
-    public static AxentBuilder AddHandlersFromAssemblyContaining<THandler>(this AxentBuilder builder) where THandler : IRequestHandler
+    public static IAxentBuilder AddHandlersFromAssemblyContaining<THandler>(this IAxentBuilder builder) where THandler : IRequestHandler
     {
         return builder.AddRequestHandlersFromAssembly(typeof(THandler).Assembly);
     }
 
-    public static AxentBuilder AddHandler<THandler>(this AxentBuilder builder)
+    public static IAxentBuilder AddHandler<THandler>(this IAxentBuilder builder)
         where THandler : class, IRequestHandler
     {
         var handlerType = typeof(THandler);
@@ -95,45 +96,20 @@ public static class AxentBuilderExtensions
         return builder;
     }
 
-    public static AxentBuilder AddPipe<TPipe>(this AxentBuilder builder)
-        where TPipe : IAxentPipe
-        => builder.AddPipe(typeof(TPipe));
-
-    public static AxentBuilder AddPipe(this AxentBuilder builder, Type pipeType)
-    {
-        if (pipeType.IsGenericTypeDefinition)
-        {
-            builder.Services.AddScoped(typeof(IAxentPipe<,>), pipeType);
-            return builder;
-        }
-
-        var serviceType =
-            pipeType
-                .GetInterfaces()
-                .FirstOrDefault(i =>
-                    i.IsGenericType &&
-                    i.GetGenericTypeDefinition() == typeof(IAxentPipe<,>))
-            ?? throw new InvalidOperationException(
-                $"{pipeType.Name} does not implement IAxentPipe<,>");
-
-        builder.Services.AddScoped(serviceType, pipeType);
-        return builder;
-    }
-
-    public static AxentBuilder AddTracing(this AxentBuilder builder)
+    public static IAxentBuilder AddTracing(this IAxentBuilder builder)
     {
         builder.Services.AddSingleton<IActivityFactory, ActivityFactory>();
         builder.AddPipe(typeof(TracingPipe<,>));
         return builder;
     }
 
-    private static void AddTransactions(this AxentBuilder builder)
+    private static void AddTransactions(this IAxentBuilder builder)
     {
         builder.Services.AddSingleton<ITransactionScopeFactory, TransactionScopeFactory>();
         builder.Services.AddScoped(typeof(ITransactionPipe<,>), typeof(TransactionPipe<,>));
     }
 
-    private static AxentBuilder AddSourceGeneratedServices(
+    private static IAxentBuilder AddSourceGeneratedServices(
         this AxentBuilder builder,
         Assembly[] assemblies)
     {
@@ -143,7 +119,7 @@ public static class AxentBuilderExtensions
 
         var allTypes = assemblies.SelectMany(a => a.GetTypes())
             .ToList();
-        var sender = allTypes.First(t => senderType.IsAssignableFrom(t));
+        var sender = allTypes.First(t => t is { IsAbstract: false, IsInterface: false} && senderType.IsAssignableFrom(t));
         builder.Services.AddScoped(senderType, sender);
 
         foreach (var type in allTypes.Where(t => t is { IsAbstract: false, IsInterface: false }))

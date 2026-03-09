@@ -1,4 +1,4 @@
-namespace Axent.Abstractions;
+namespace Axent.Abstractions.Models;
 
 public sealed class RequestContext<TRequest>
 {

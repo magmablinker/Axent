@@ -1,11 +1,11 @@
-using Axent.Core.DependencyInjection;
+using Axent.Abstractions.Builders;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Axent.Extensions.Authorization;
 
 public static class AxentBuilderExtensions
 {
-    public static AxentBuilder AddAuthorization(this AxentBuilder builder)
+    public static IAxentBuilder AddAuthorization(this IAxentBuilder builder)
     {
         builder.Services.AddAuthorization();
         builder.Services.AddHttpContextAccessor();

@@ -10,12 +10,17 @@ internal static class TypeSymbolExtensions
             MetadataName: "IRequest`1",
             ContainingNamespace:
             {
-                Name: "Abstractions",
+                Name: "Requests",
                 ContainingNamespace:
                 {
-                    Name: "Axent",
-                    ContainingNamespace.IsGlobalNamespace: true
+                    Name: "Abstractions",
+                    ContainingNamespace:
+                    {
+                        Name: "Axent",
+                        ContainingNamespace.IsGlobalNamespace: true
+                    }
                 }
             }
+
         };
 }

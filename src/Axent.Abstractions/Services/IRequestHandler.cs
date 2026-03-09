@@ -1,4 +1,7 @@
-namespace Axent.Abstractions;
+using Axent.Abstractions.Models;
+using Axent.Abstractions.Requests;
+
+namespace Axent.Abstractions.Services;
 
 /// <summary>
 /// Marker interface. Do not implement.

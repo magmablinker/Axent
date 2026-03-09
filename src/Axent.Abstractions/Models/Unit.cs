@@ -1,4 +1,4 @@
-namespace Axent.Abstractions;
+namespace Axent.Abstractions.Models;
 
 /// <summary>
 /// Use this type when your IRequestHandler should return void
