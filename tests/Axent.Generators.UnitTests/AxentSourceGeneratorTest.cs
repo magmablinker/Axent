@@ -118,7 +118,6 @@ public sealed class AxentSourceGeneratorTests
         Assert.Contains(generatedTrees, t => t.FilePath.EndsWith("Sender.g.cs"));
         Assert.Contains(generatedTrees, t => t.FilePath.EndsWith("Pipelines.g.cs"));
         Assert.Contains(generatedTrees, t => t.FilePath.EndsWith("HandlerPipe.g.cs"));
-        Assert.Contains(generatedTrees, t => t.FilePath.EndsWith("AxentModuleInitializer.g.cs"));
     }
 
     [Fact]

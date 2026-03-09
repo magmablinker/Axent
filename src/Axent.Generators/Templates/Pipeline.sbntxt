@@ -11,7 +11,7 @@ using Axent.Core.Pipes.Transactions;
 namespace Axent.Generated;
 
 {{ for type in types }}
-internal sealed class {{ type.symbol_name }}Pipeline
+internal sealed class {{ type.symbol_name }}Pipeline : IPipeline
 {
     private readonly IRequestContextFactory _contextFactory;
     private readonly Func<RequestContext<{{ type.request_full_name }}>, CancellationToken, ValueTask<Response<{{ type.response_full_name }}>>> _compiled;

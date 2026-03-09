@@ -9,7 +9,7 @@ namespace Axent.Generated;
 
 {{ for type in types }}
 internal sealed class {{ type.symbol_name }}HandlerPipe
-    : IAxentPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>
+    : IAxentPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>, IHandlerPipe
 {
     private readonly IRequestHandler<{{ type.request_full_name }}, {{ type.response_full_name }}> _requestHandler;
 

@@ -4,19 +4,19 @@ using Axent.Core.DependencyInjection;
 using Axent.Core.Pipes.Transactions;
 using Axent.Tests.Shared;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Axent.Core.UnitTests.Pipes.Transactions;
 
 public sealed class TransactionalHandlerTest : TestBase
 {
-    private readonly Mock<ITransactionScopeFactory> _transactionScopeFactoryMock = new();
+    private readonly ITransactionScopeFactory _transactionScopeFactory = Substitute.For<ITransactionScopeFactory>();
 
     public TransactionalHandlerTest()
     {
-        _transactionScopeFactoryMock.Setup(m => m.Create())
-            .Returns(new TransactionScope());
+        _transactionScopeFactory.Create()
+            .Returns(_ => new TransactionScope());
     }
 
     protected override void ConfigureAxentOptions(AxentOptions options)
@@ -26,7 +26,7 @@ public sealed class TransactionalHandlerTest : TestBase
 
     protected override void ConfigureAxent(AxentBuilder builder)
     {
-        builder.Services.AddSingleton<ITransactionScopeFactory>(_ => _transactionScopeFactoryMock.Object);
+        builder.Services.AddSingleton(_transactionScopeFactory);
     }
 
     [Fact]
@@ -42,7 +42,7 @@ public sealed class TransactionalHandlerTest : TestBase
 
         // Assert
         Assert.True(response.IsSuccess);
-        _transactionScopeFactoryMock.Verify(m => m.Create(), Times.Once());
+        _transactionScopeFactory.Received(1).Create();
     }
 
     [Fact]
@@ -58,6 +58,6 @@ public sealed class TransactionalHandlerTest : TestBase
 
         // Assert
         Assert.True(response.IsSuccess);
-        _transactionScopeFactoryMock.Verify(m => m.Create(), Times.Never());
+        _transactionScopeFactory.DidNotReceive().Create();
     }
 }

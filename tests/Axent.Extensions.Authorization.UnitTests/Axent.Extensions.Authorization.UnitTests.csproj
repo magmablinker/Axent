@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Axent.Tests.Shared\Axent.Tests.Shared.csproj" />
+    <ProjectReference Include="..\..\src\Axent.Extensions.Authorization\Axent.Extensions.Authorization.csproj" />
+  </ItemGroup>
+</Project>

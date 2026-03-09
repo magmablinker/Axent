@@ -4,27 +4,30 @@ using Axent.Core.DependencyInjection;
 using Axent.Core.Pipes.Observability;
 using Axent.Tests.Shared;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using NSubstitute;
 using Xunit;
 
 namespace Axent.Core.UnitTests.Pipes.Observability;
 
-public sealed class TracingHandlerPipe : TestBase
+public sealed class TracingHandlerPipeTest : TestBase
 {
     private static readonly ActivitySource _activitySource = new(ActivityTags.ActivityId);
 
-    private readonly Mock<IActivityFactory> _activityFactoryMock = new();
+    private readonly IActivityFactory _activityFactory = Substitute.For<IActivityFactory>();
 
-    public TracingHandlerPipe()
+    public TracingHandlerPipeTest()
     {
-        _activityFactoryMock.Setup(m => m.Create<It.IsAnyType>())
-            .Returns(() => _activitySource.StartActivity(string.Empty));
+        _activityFactory.Create<TestCommand>()
+            .Returns(_ => _activitySource.StartActivity(string.Empty));
+
+        _activityFactory.Create<TestQuery>()
+            .Returns(_ => _activitySource.StartActivity(string.Empty));
     }
 
     protected override void ConfigureAxent(AxentBuilder builder)
     {
         builder.AddTracing();
-        builder.Services.AddSingleton<IActivityFactory>(_ => _activityFactoryMock.Object);
+        builder.Services.AddSingleton(_activityFactory);
     }
 
     [Fact]
@@ -40,7 +43,7 @@ public sealed class TracingHandlerPipe : TestBase
 
         // Assert
         Assert.True(response.IsSuccess);
-        _activityFactoryMock.Verify(m => m.Create<TestCommand>(), Times.Once());
+        _activityFactory.Received(1).Create<TestCommand>();
     }
 
     [Fact]
@@ -56,6 +59,6 @@ public sealed class TracingHandlerPipe : TestBase
 
         // Assert
         Assert.True(response.IsSuccess);
-        _activityFactoryMock.Verify(m => m.Create<TestQuery>(), Times.Once());
+        _activityFactory.Received(1).Create<TestQuery>();
     }
 }

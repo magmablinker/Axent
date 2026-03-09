@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.12]
+
+### Features Added
+- Add `Axent.Extensions.Authorization` for request authorization
+
 ## [1.2.1]
 
 ### Features Added

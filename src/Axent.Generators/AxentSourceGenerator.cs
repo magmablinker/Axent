@@ -12,7 +12,6 @@ namespace Axent.Generators;
 [Generator]
 public sealed class AxentSourceGenerator : IIncrementalGenerator
 {
-    private const string AxentModuleInitializerFile = "AxentModuleInitializer.g.cs";
     private const string SenderFile = "Sender.g.cs";
     private const string PipelinesFile = "Pipelines.g.cs";
     private const string HandlerPipeFile = "HandlerPipe.g.cs";
@@ -90,10 +89,6 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
 
         ctx.AddSource(HandlerPipeFile,
             SourceText.From(BuildHandlerPipeSource(requests, ctx), Encoding.UTF8));
-
-        ctx.AddSource(
-            AxentModuleInitializerFile,
-            SourceText.From(BuildModuleInitializerSource(requests, ctx), Encoding.UTF8));
     }
 
     private static string BuildSenderSource(ImmutableArray<RequestTypeInfo> types, SourceProductionContext ctx)
@@ -104,9 +99,6 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
 
     private static string BuildHandlerPipeSource(ImmutableArray<RequestTypeInfo> types, SourceProductionContext ctx)
         => RenderTemplate(types, GetTemplate("HandlerPipe", ctx));
-
-    private static string BuildModuleInitializerSource(ImmutableArray<RequestTypeInfo> types, SourceProductionContext ctx)
-        => RenderTemplate(types, GetTemplate("ModuleInitializer", ctx));
 
     private static Template? GetTemplate(string name, SourceProductionContext ctx)
     {

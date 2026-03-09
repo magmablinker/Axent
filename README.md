@@ -38,8 +38,8 @@
 
 #### 1. Install Packages
 ```shell
-dotnet add package Axent.Core --version 1.2.1
-dotnet add package Axent.Extensions.AspNetCore --version 1.2.1
+dotnet add package Axent.Core 
+dotnet add package Axent.Extensions.AspNetCore
 ```
 
 #### 2. Register Services
