@@ -103,13 +103,13 @@ public static class AxentBuilderExtensions
         return builder;
     }
 
-    private static void AddTransactions(this IAxentBuilder builder)
+    private static void AddTransactions(this AxentBuilder builder)
     {
         builder.Services.AddSingleton<ITransactionScopeFactory, TransactionScopeFactory>();
         builder.Services.AddScoped(typeof(ITransactionPipe<,>), typeof(TransactionPipe<,>));
     }
 
-    private static AxentBuilder AddSourceGeneratedServices(
+    private static void AddSourceGeneratedServices(
         this AxentBuilder builder,
         Assembly[] assemblies)
     {
