@@ -76,6 +76,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Extensions.Caching", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Extensions.Caching.UnitTests", "tests\Axent.Extensions.Caching.UnitTests\Axent.Extensions.Caching.UnitTests.csproj", "{CD3061CD-DBD2-4E1D-AEFE-21DD59F95294}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Example.Application", "samples\Axent.Example.Application\Axent.Example.Application.csproj", "{AB645D61-5036-48ED-AA0D-CEC36A746B50}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -154,6 +156,10 @@ Global
 		{CD3061CD-DBD2-4E1D-AEFE-21DD59F95294}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD3061CD-DBD2-4E1D-AEFE-21DD59F95294}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD3061CD-DBD2-4E1D-AEFE-21DD59F95294}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB645D61-5036-48ED-AA0D-CEC36A746B50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB645D61-5036-48ED-AA0D-CEC36A746B50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB645D61-5036-48ED-AA0D-CEC36A746B50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB645D61-5036-48ED-AA0D-CEC36A746B50}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -180,6 +186,7 @@ Global
 		{329A81F7-D08C-2676-0665-7CE33570E538} = {D4C5F6EB-2F81-47D0-875D-353E24BE2303}
 		{EFED9EA4-7E95-4C96-8CC9-B874A13F054E} = {3DE3CE73-CD6A-484A-95F1-D977EB1628BF}
 		{CD3061CD-DBD2-4E1D-AEFE-21DD59F95294} = {D4C5F6EB-2F81-47D0-875D-353E24BE2303}
+		{AB645D61-5036-48ED-AA0D-CEC36A746B50} = {E60AF34B-5D79-47A6-92A0-55E7B040F6E2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {22A40C2C-CE32-478C-BCAD-E82586AFFE5A}

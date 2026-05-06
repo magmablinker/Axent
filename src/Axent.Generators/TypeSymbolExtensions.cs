@@ -4,23 +4,37 @@ namespace Axent.Generators;
 
 internal static class TypeSymbolExtensions
 {
-    public static bool IsRequestInterface(this INamedTypeSymbol symbol)
-        => symbol is
-        {
-            MetadataName: "IRequest`1",
-            ContainingNamespace:
+    extension(INamedTypeSymbol symbol)
+    {
+        public bool IsRequestFamilyInterface()
+            => symbol.IsAxentRequestInterface("IRequest`1")
+               || symbol.IsAxentRequestInterface("ICommand`1")
+               || symbol.IsAxentRequestInterface("IQuery`1")
+               || symbol.IsAxentRequestInterface("ICacheableQuery`1");
+
+        public bool IsCommandInterface()
+            => symbol.IsAxentRequestInterface("ICommand`1");
+
+        public bool IsCacheableQueryInterface()
+            => symbol.IsAxentRequestInterface("ICacheableQuery`1");
+
+        private bool IsAxentRequestInterface(string metadataName)
+            => symbol is
             {
-                Name: "Requests",
+                MetadataName: var currentMetadataName,
                 ContainingNamespace:
                 {
-                    Name: "Abstractions",
+                    Name: "Requests",
                     ContainingNamespace:
                     {
-                        Name: "Axent",
-                        ContainingNamespace.IsGlobalNamespace: true
+                        Name: "Abstractions",
+                        ContainingNamespace:
+                        {
+                            Name: "Axent",
+                            ContainingNamespace.IsGlobalNamespace: true
+                        }
                     }
                 }
-            }
-
-        };
+            } && currentMetadataName == metadataName;
+    }
 }

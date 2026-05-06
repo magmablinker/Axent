@@ -1,5 +1,6 @@
 using Axent.Abstractions.Services;
 using Axent.Core.DependencyInjection;
+using Axent.Example.Application;
 using Axent.ExampleApi;
 using Axent.Extensions.AspNetCore;
 using Axent.Extensions.Caching;
@@ -10,8 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddValidatorsFromAssemblyContaining<ExampleCommandValidator>();
 
-builder.Services.AddAxent(o => builder.Configuration.Bind("AppSettings:Axent", o))
-    .AddHandlersFromAssemblyContaining<ExampleCommandHandler>()
+var apiAssembly = typeof(OtherQuery).Assembly;
+var applicationAssembly = typeof(ExampleCommand).Assembly;
+
+builder.Services.AddAxent(o => builder.Configuration.Bind("AppSettings:Axent", o), assemblies: [apiAssembly, applicationAssembly])
+    .AddRequestHandlersFromAssembly(apiAssembly)
+    .AddRequestHandlersFromAssembly(applicationAssembly)
     .AddTracing()
     .AddAutoFluentValidation()
     .AddCache()

@@ -1,4 +1,4 @@
-using Axent.Abstractions;
+using Axent.Abstractions.Services;
 using Axent.Core.DependencyInjection;
 using Axent.Extensions.AspNetCore;
 using Axent.Templates.MinimalApi.UseCases.Welcome;

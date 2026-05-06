@@ -12,9 +12,10 @@ namespace Axent.Generators;
 [Generator]
 public sealed class AxentSourceGenerator : IIncrementalGenerator
 {
-    private const string SenderFile = "Sender.g.cs";
     private const string PipelinesFile = "Pipelines.g.cs";
     private const string HandlerPipeFile = "HandlerPipe.g.cs";
+    private const string RequestModuleFile = "RequestModule.g.cs";
+    private const string RegistrarFile = "Registrar.g.cs";
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -22,15 +23,19 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
             context.SyntaxProvider
                 .CreateSyntaxProvider(
                     predicate: static (node, _) =>
-                        node is (ClassDeclarationSyntax or RecordDeclarationSyntax)
-                            and TypeDeclarationSyntax { BaseList.Types.Count: > 0 },
+                        node is ClassDeclarationSyntax or RecordDeclarationSyntax,
                     transform: static (ctx, ct) => GetRequestInfo(ctx, ct))
                 .Where(static info => info is not null)
                 .Collect();
 
+        var assemblyName = context.CompilationProvider
+            .Select(static (compilation, _) => compilation.AssemblyName ?? "Assembly");
+
+        var input = requestTypes.Combine(assemblyName);
+
         context.RegisterSourceOutput(
-            requestTypes,
-            static (spc, types) => Execute(spc, types));
+            input,
+            static (spc, source) => Execute(spc, source.Left, source.Right));
     }
 
     private static RequestTypeInfo? GetRequestInfo(
@@ -46,62 +51,59 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
             return null;
         }
 
-        // ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-        foreach (var @interface in symbol.AllInterfaces)
+        var requestInterface = symbol.AllInterfaces
+            .FirstOrDefault(static i => i.IsRequestFamilyInterface());
+
+        if (requestInterface is null || requestInterface.TypeArguments.Length != 1)
         {
-            if (!@interface.IsRequestInterface())
-            {
-                continue;
-            }
-
-            var responseType = @interface.TypeArguments[0];
-
-            var isCommand = @interface.OriginalDefinition.ToDisplayString() == "Axent.Abstractions.Requests.ICommand<TResponse>"
-                            || symbol.AllInterfaces.Any(i => i.OriginalDefinition.ToDisplayString() == "Axent.Abstractions.Requests.ICommand<TResponse>");
-            var isCacheable = @interface.OriginalDefinition.ToDisplayString() == "Axent.Abstractions.Requests.ICacheableQuery<TResponse>"
-                              || symbol.AllInterfaces.Any(i => i.OriginalDefinition.ToDisplayString() == "Axent.Abstractions.Requests.ICacheableQuery<TResponse>");
-            return new(
-                RequestFullName: symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                ResponseFullName: responseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                SymbolName: symbol.Name,
-                IsCommand: isCommand,
-                IsCacheable: isCacheable);
+            return null;
         }
 
-        return null;
+        var responseType = requestInterface.TypeArguments[0];
+
+        var isCommand = symbol.AllInterfaces.Any(static i => i.IsCommandInterface());
+
+        var isCacheable = symbol.AllInterfaces.Any(static i => i.IsCacheableQueryInterface());
+
+        return new RequestTypeInfo(
+            RequestFullName: symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            ResponseFullName: responseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            SymbolName: symbol.Name,
+            IsCommand: isCommand,
+            IsCacheable: isCacheable);
     }
 
     private static void Execute(
         SourceProductionContext ctx,
-        ImmutableArray<RequestTypeInfo?> types)
+        ImmutableArray<RequestTypeInfo?> types,
+        string assemblyName)
     {
-        var requests = types.OfType<RequestTypeInfo>()
-                .OrderBy(t => t.RequestFullName)
-                .ToImmutableArray();
+        var requests = types
+            .OfType<RequestTypeInfo>()
+            .GroupBy(t => t.RequestFullName)
+            .Select(g => g.First())
+            .OrderBy(t => t.RequestFullName)
+            .ToImmutableArray();
 
         if (requests.Length == 0)
         {
             return;
         }
 
-        ctx.AddSource(SenderFile,
-            SourceText.From(BuildSenderSource(requests, ctx), Encoding.UTF8));
+        var registrarTypeName = CreateRegistrarTypeName(assemblyName);
 
         ctx.AddSource(PipelinesFile,
-            SourceText.From(BuildPipelinesSource(requests, ctx), Encoding.UTF8));
+            SourceText.From(RenderTemplate(requests, registrarTypeName, GetTemplate("Pipeline", ctx)), Encoding.UTF8));
 
         ctx.AddSource(HandlerPipeFile,
-            SourceText.From(BuildHandlerPipeSource(requests, ctx), Encoding.UTF8));
+            SourceText.From(RenderTemplate(requests, registrarTypeName, GetTemplate("HandlerPipe", ctx)), Encoding.UTF8));
+
+        ctx.AddSource(RequestModuleFile,
+            SourceText.From(RenderTemplate(requests, registrarTypeName, GetTemplate("RequestModule", ctx)), Encoding.UTF8));
+
+        ctx.AddSource(RegistrarFile,
+            SourceText.From(RenderTemplate(requests, registrarTypeName, GetTemplate("Registrar", ctx)), Encoding.UTF8));
     }
-
-    private static string BuildSenderSource(ImmutableArray<RequestTypeInfo> types, SourceProductionContext ctx)
-        => RenderTemplate(types, GetTemplate("Sender", ctx));
-
-    private static string BuildPipelinesSource(ImmutableArray<RequestTypeInfo> types, SourceProductionContext ctx)
-        => RenderTemplate(types, GetTemplate("Pipeline", ctx));
-
-    private static string BuildHandlerPipeSource(ImmutableArray<RequestTypeInfo> types, SourceProductionContext ctx)
-        => RenderTemplate(types, GetTemplate("HandlerPipe", ctx));
 
     private static Template? GetTemplate(string name, SourceProductionContext ctx)
     {
@@ -117,14 +119,15 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
                 "Template '{0}' could not be found",
                 "AxentSourceGenerator",
                 DiagnosticSeverity.Error,
-                true
-            );
+                true);
+
             ctx.ReportDiagnostic(Diagnostic.Create(templateMissing, Location.None, name));
             return null;
         }
 
         using var reader = new StreamReader(stream);
         var template = Template.Parse(reader.ReadToEnd());
+
         if (!template.HasErrors)
         {
             return template;
@@ -132,18 +135,25 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
 
         var templateError = new DiagnosticDescriptor(
             "AXENT002",
-            "Template missing",
+            "Template error",
             "Template '{0}' has errors: '{1}'",
             "AxentSourceGenerator",
             DiagnosticSeverity.Error,
-            true
-        );
-        ctx.ReportDiagnostic(Diagnostic.Create(templateError, Location.None, name, string.Join(", ", template.Messages.ToList())));
+            true);
+
+        ctx.ReportDiagnostic(Diagnostic.Create(
+            templateError,
+            Location.None,
+            name,
+            string.Join(", ", template.Messages.ToList())));
 
         return null;
     }
 
-    private static string RenderTemplate(ImmutableArray<RequestTypeInfo> types, Template? template)
+    private static string RenderTemplate(
+        ImmutableArray<RequestTypeInfo> types,
+        string registrarTypeName,
+        Template? template)
     {
         if (template is null)
         {
@@ -152,8 +162,35 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
 
         var context = new TemplateContext();
         var scriptObject = new ScriptObject();
-        scriptObject.Import(new { Types = types });
+
+        scriptObject.Import(new
+        {
+            Types = types,
+            RegistrarTypeName = registrarTypeName
+        });
+
         context.PushGlobal(scriptObject);
+
         return template.Render(context);
+    }
+
+    private static string CreateRegistrarTypeName(string assemblyName)
+    {
+        var builder = new StringBuilder("AxentGeneratedModuleRegistrar");
+
+        foreach (var character in assemblyName)
+        {
+            if (char.IsLetterOrDigit(character))
+            {
+                builder.Append(character);
+            }
+        }
+
+        if (builder.Length == "AxentGeneratedModuleRegistrar".Length)
+        {
+            builder.Append("Assembly");
+        }
+
+        return builder.ToString();
     }
 }

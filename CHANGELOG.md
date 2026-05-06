@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0]
+
+### Breaking Changes
+- Rework source generation so multiple assemblies work properly
+
+### Bugs Fixed
+- Only complete transaction if request has been completed successfully
+- Bump scriban version to 7.1.0
+
 ## [1.2.2]
 
 ### Breaking Changes

@@ -19,7 +19,10 @@ internal sealed class TransactionPipe<TRequest, TResponse> : ITransactionPipe<TR
         using var scope = _factory.Create();
 
         var response = await chain.NextAsync(context, cancellationToken);
-        scope.Complete();
+        if (response.IsSuccess)
+        {
+            scope.Complete();
+        }
 
         return response;
     }
