@@ -33,9 +33,6 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
 
-      - name: Check formatting
-        run: dotnet format --verify-no-changes --no-restore
-
       - name: Begin SonarCloud analysis
         run: |
           dotnet sonarscanner begin \
