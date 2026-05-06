@@ -51,37 +51,26 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
             return null;
         }
 
-        foreach (var @interface in symbol.AllInterfaces)
+        var requestInterface = symbol.AllInterfaces
+            .FirstOrDefault(static i => i.IsRequestFamilyInterface());
+
+        if (requestInterface is null || requestInterface.TypeArguments.Length != 1)
         {
-            if (!@interface.IsRequestInterface())
-            {
-                continue;
-            }
-
-            if (@interface.TypeArguments.Length != 1)
-            {
-                continue;
-            }
-
-            var responseType = @interface.TypeArguments[0];
-
-            var isCommand = symbol.AllInterfaces.Any(i =>
-                i.OriginalDefinition.ToDisplayString() ==
-                "Axent.Abstractions.Requests.ICommand<TResponse>");
-
-            var isCacheable = symbol.AllInterfaces.Any(i =>
-                i.OriginalDefinition.ToDisplayString() ==
-                "Axent.Abstractions.Requests.ICacheableQuery<TResponse>");
-
-            return new RequestTypeInfo(
-                RequestFullName: symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                ResponseFullName: responseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-                SymbolName: symbol.Name,
-                IsCommand: isCommand,
-                IsCacheable: isCacheable);
+            return null;
         }
 
-        return null;
+        var responseType = requestInterface.TypeArguments[0];
+
+        var isCommand = symbol.AllInterfaces.Any(static i => i.IsCommandInterface());
+
+        var isCacheable = symbol.AllInterfaces.Any(static i => i.IsCacheableQueryInterface());
+
+        return new RequestTypeInfo(
+            RequestFullName: symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            ResponseFullName: responseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
+            SymbolName: symbol.Name,
+            IsCommand: isCommand,
+            IsCacheable: isCacheable);
     }
 
     private static void Execute(
