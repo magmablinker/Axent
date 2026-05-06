@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Axent.ExampleApi;
+namespace Axent.Example.Application;
 
 public sealed class ExampleCommandValidator : AbstractValidator<ExampleCommand>
 {

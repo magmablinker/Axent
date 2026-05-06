@@ -1,15 +1,16 @@
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Requests;
 using Axent.Abstractions.Services;
+using Microsoft.Extensions.Logging;
 
-namespace Axent.ExampleApi;
+namespace Axent.Example.Application;
 
 public sealed class ExampleCommand : ICommand<ExampleResponse>
 {
     public required string Message { get; init; }
 }
 
-internal sealed class ExampleResponse
+public sealed class ExampleResponse
 {
     public required string Message { get; init; }
 }

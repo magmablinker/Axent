@@ -1,9 +1,10 @@
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Pipelines;
+using Microsoft.Extensions.Logging;
 
-namespace Axent.ExampleApi;
+namespace Axent.Example.Application;
 
-internal sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TRequest, TResponse>
+public sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TRequest, TResponse>
 {
     private readonly ILogger<ExampleRequestPipe<TRequest, TResponse>> _logger;
 

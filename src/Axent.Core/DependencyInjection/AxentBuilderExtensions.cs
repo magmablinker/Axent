@@ -3,10 +3,13 @@ using Axent.Abstractions.Builders;
 using Axent.Abstractions.Factories;
 using Axent.Abstractions.Pipelines;
 using Axent.Abstractions.Services;
+using Axent.Core.Attributes;
 using Axent.Core.Factories;
 using Axent.Core.Pipes.Observability;
 using Axent.Core.Pipes.Transactions;
+using Axent.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Axent.Core.DependencyInjection;
 
@@ -32,6 +35,8 @@ public static class AxentBuilderExtensions
             .AddSingleton(options)
             .AddScoped<IRequestContextFactory, RequestContextFactory>();
 
+        builder.Services.TryAddScoped<ISender, Sender>();
+
         if (options.Transactions.UseTransactions)
         {
             builder.AddTransactions();
@@ -48,6 +53,7 @@ public static class AxentBuilderExtensions
         }
 
         builder.AddSourceGeneratedServices(assemblies);
+        builder.RegisterGeneratedModules(assemblies);
 
         return builder;
     }
@@ -113,14 +119,11 @@ public static class AxentBuilderExtensions
         this AxentBuilder builder,
         Assembly[] assemblies)
     {
-        var senderType = typeof(ISender);
         var pipelineType = typeof(IPipeline);
         var handlerPipeType = typeof(IHandlerPipe);
 
         var allTypes = assemblies.SelectMany(a => a.GetTypes())
             .ToList();
-        var sender = allTypes.First(t => t is { IsAbstract: false, IsInterface: false } && senderType.IsAssignableFrom(t));
-        builder.Services.AddScoped(senderType, sender);
 
         foreach (var type in allTypes.Where(t => t is { IsAbstract: false, IsInterface: false }))
         {
@@ -134,7 +137,27 @@ public static class AxentBuilderExtensions
                 builder.Services.AddScoped(type);
             }
         }
+    }
 
-        return builder;
+    private static void RegisterGeneratedModules(
+        this IAxentBuilder builder,
+        Assembly[] assemblies)
+    {
+        foreach (var attribute in assemblies.SelectMany(a => a.GetCustomAttributes<AxentModuleAttribute>()))
+        {
+            if (!typeof(IAxentModuleRegistrar).IsAssignableFrom(attribute.RegistrarType))
+            {
+                throw new InvalidOperationException(
+                    $"Axent registrar type '{attribute.RegistrarType.FullName}' does not implement '{typeof(IAxentModuleRegistrar).FullName}'.");
+            }
+
+            if (Activator.CreateInstance(attribute.RegistrarType) is not IAxentModuleRegistrar registrar)
+            {
+                throw new InvalidOperationException(
+                    $"Could not create Axent registrar '{attribute.RegistrarType.FullName}'.");
+            }
+
+            registrar.Register(builder.Services);
+        }
     }
 }
