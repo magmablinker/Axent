@@ -30,7 +30,6 @@ internal sealed class InMemoryCache(IMemoryCache memoryCache) : ICache, IDisposa
         CancellationToken cancellationToken = default)
     {
         var entryOptions = await CreateMemoryCacheEntryOptionsAsync(options, cancellationToken);
-
         memoryCache.Set(key, value, entryOptions);
     }
 
@@ -54,7 +53,7 @@ internal sealed class InMemoryCache(IMemoryCache memoryCache) : ICache, IDisposa
 
         try
         {
-            foreach (var tag in NormalizeTags(tags))
+            foreach (var tag in tags)
             {
                 if (!_tagTokens.Remove(tag, out var currentTokenSource))
                 {
@@ -115,7 +114,7 @@ internal sealed class InMemoryCache(IMemoryCache memoryCache) : ICache, IDisposa
 
         try
         {
-            foreach (var tag in NormalizeTags(tags))
+            foreach (var tag in tags)
             {
                 if (!_tagTokens.TryGetValue(tag, out var tokenSource))
                 {
@@ -131,14 +130,6 @@ internal sealed class InMemoryCache(IMemoryCache memoryCache) : ICache, IDisposa
         {
             _tagSemaphore.Release();
         }
-    }
-
-    private static IEnumerable<string> NormalizeTags(IEnumerable<string> tags)
-    {
-        return tags
-            .Where(tag => !string.IsNullOrWhiteSpace(tag))
-            .Select(tag => tag.Trim())
-            .Distinct(_tagComparer);
     }
 
     public void Dispose()
