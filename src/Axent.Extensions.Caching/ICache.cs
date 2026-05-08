@@ -7,4 +7,5 @@ public interface ICache
     ValueTask<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default);
     ValueTask SetAsync<T>(string key, T value, CacheEntryOptions? options = null, CancellationToken cancellationToken = default);
     ValueTask RemoveAsync(string key, CancellationToken cancellationToken = default);
+    ValueTask RemoveByTagsAsync(IEnumerable<string> tags, CancellationToken cancellation = default);
 }

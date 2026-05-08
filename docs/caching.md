@@ -65,7 +65,8 @@ public sealed record GetDashboardQuery(Guid UserId) : ICacheableQuery<DashboardD
     public CacheEntryOptions CacheOptions => new()
     {
         AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10),
-        SlidingExpiration = TimeSpan.FromMinutes(2)
+        SlidingExpiration = TimeSpan.FromMinutes(2),
+        Tags = ["dashboard"]
     };
 }
 ```
@@ -77,6 +78,9 @@ Supported options
 
 * `SlidingExpiration`
   - Extends the lifetime while the entry continues to be accessed
+
+* `Tags`
+  - Group cache values by tag to remove multiple cached values in one go.
 
 ## ⏭️ Bypass the cache
 A request can decide to bypass the cache completely.
@@ -106,6 +110,7 @@ public interface ICache
     ValueTask<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default);
     ValueTask SetAsync<T>(string key, T value, CacheEntryOptions? options = null, CancellationToken cancellationToken = default);
     ValueTask RemoveAsync(string key, CancellationToken cancellationToken = default);
+    ValueTask RemoveByTagsAsync(IEnumerable<string> tags, CancellationToken cancellation = default);
 }
 ```
 
@@ -128,6 +133,11 @@ public sealed class CustomCache : ICache
     {
         throw new NotImplementedException();
     }
+
+    public ValueTask RemoveByTagsAsync(IEnumerable<string> tags, CancellationToken cancellation = default)
+    {
+        throw new NotImplementedException();
+    }
 }
 ```
 Register your implementation:
@@ -137,13 +147,22 @@ builder.Services.AddSingleton<ICache, CustomCache>();
 ```
 
 ## 🧼 Removing cache entries
-`ICache` also exposes `RemoveAsync`, which allows cache invalidation from your own application code.
+
+### Single entry
+`ICache` exposes `RemoveAsync`, which allows cache invalidation fpr single entries.
 
 ```csharp
 await cache.RemoveAsync($"order:{orderId}", cancellationToken);
 ```
 
-A common pattern is to remove cached entries after a successful command that changes data.
+### Multiple entries
+`ICache` exposes `RemoveByTagsAsync`, which allows cache invalidation for multiple entries.
+
+```csharp
+await cache.RemoveByTagsAsync(["orders"], cancellationToken);
+```
+
+> **Hint**: A common pattern is to remove cached entries after e.g a successful command that changes data.
 
 ## 📌 Notes
 * caching is opt-in

@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.0.1]
+
+### Features Added
+- Add tags to `CacheEntryOptions`
+
 ## [2.0.0]
 
 ### Breaking Changes
