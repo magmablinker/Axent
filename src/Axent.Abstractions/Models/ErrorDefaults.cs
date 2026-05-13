@@ -24,6 +24,9 @@ public static class ErrorDefaults
         public static Error BadRequest() =>
             new($"{nameof(Generic)}.{nameof(BadRequest)}", HttpStatusCode.BadRequest);
 
+        public static Error PaymentRequired() =>
+            new($"{nameof(Generic)}.{nameof(PaymentRequired)}", HttpStatusCode.PaymentRequired);
+
         public static Error InternalServerError() =>
             new($"{nameof(Generic)}.{nameof(InternalServerError)}", HttpStatusCode.InternalServerError);
 
