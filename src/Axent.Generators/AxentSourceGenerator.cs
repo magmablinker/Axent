@@ -288,12 +288,9 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
     {
         var builder = new StringBuilder("AxentGeneratedModuleRegistrar");
 
-        foreach (var character in assemblyName)
+        foreach (var character in assemblyName.Where(char.IsLetterOrDigit))
         {
-            if (char.IsLetterOrDigit(character))
-            {
-                builder.Append(character);
-            }
+            builder.Append(character);
         }
 
         if (builder.Length == "AxentGeneratedModuleRegistrar".Length)
@@ -315,12 +312,9 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
     {
         var builder = new StringBuilder();
 
-        foreach (var character in value)
+        foreach (var character in value.Where(char.IsLetterOrDigit))
         {
-            if (char.IsLetterOrDigit(character))
-            {
-                builder.Append(character);
-            }
+            builder.Append(character);
         }
 
         return builder.Length == 0
