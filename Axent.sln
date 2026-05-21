@@ -16,6 +16,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Extensions.AspNetCore", "src\Axent.Extensions.AspNetCore\Axent.Extensions.AspNetCore.csproj", "{FEE57F0A-6316-4514-B1E2-8FDF0967EE21}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{D4C5F6EB-2F81-47D0-875D-353E24BE2303}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Axent.Extensions.AspNetCore.UnitTests", "tests\Axent.Extensions.AspNetCore.UnitTests\Axent.Extensions.AspNetCore.UnitTests.csproj", "{763FB29D-C146-4D59-9026-997C5973F242}"
 EndProject

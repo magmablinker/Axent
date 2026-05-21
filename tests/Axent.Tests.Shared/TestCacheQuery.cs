@@ -1,9 +1,11 @@
+using Axent.Abstractions.Attributes;
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Requests;
 using Axent.Abstractions.Services;
 
 namespace Axent.Tests.Shared;
 
+[Axent]
 public sealed record TestCacheQuery(string Message, bool BypassCache = false) : ICacheableQuery<string>
 {
     public string CacheKey => nameof(TestCacheQuery);

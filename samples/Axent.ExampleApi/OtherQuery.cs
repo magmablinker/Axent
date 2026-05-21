@@ -1,3 +1,4 @@
+using Axent.Abstractions.Attributes;
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Options;
 using Axent.Abstractions.Pipelines;
@@ -6,6 +7,7 @@ using Axent.Abstractions.Services;
 
 namespace Axent.ExampleApi;
 
+[Axent]
 internal sealed class OtherQuery : ICacheableQuery<OtherResponse>
 {
     public required string Message { get; init; }

@@ -23,7 +23,7 @@ public sealed class ErrorHandlingPipeTest : TestBase
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         // Act
-        var response = await sender.SendAsync(query);
+        var response = await sender.SendAsync(query, TestContext.Current.CancellationToken);
 
         // Assert
         var invalidOperationException = new InvalidOperationException();

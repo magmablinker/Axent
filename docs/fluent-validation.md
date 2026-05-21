@@ -22,7 +22,7 @@ public sealed class ExampleCommandValidator : AbstractValidator<ExampleCommand>
     }
 }
 ```
-> Validators must be public when they are discovered via assembly scanning.
+> **Hint:** Validators must be public when they are discovered via assembly scanning.
 
 3. Register validators and enable FluentValidation
 ```csharp

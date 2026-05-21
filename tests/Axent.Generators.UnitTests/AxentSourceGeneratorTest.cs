@@ -516,6 +516,6 @@ public sealed class AxentSourceGeneratorTests
 
         // Assert
         AssertNoErrors(diagnostics);
-        AssertNoErrors(outputCompilation.GetDiagnostics());
+        AssertNoErrors(outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken));
     }
 }

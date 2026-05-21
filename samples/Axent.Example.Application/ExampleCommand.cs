@@ -1,3 +1,4 @@
+using Axent.Abstractions.Attributes;
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Requests;
 using Axent.Abstractions.Services;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Axent.Example.Application;
 
+[Axent]
 public sealed class ExampleCommand : ICommand<ExampleResponse>
 {
     public required string Message { get; init; }

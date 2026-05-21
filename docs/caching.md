@@ -38,6 +38,7 @@ When a cached request is sent:
 5. later requests with the same cache key reuse the cached response
 
 ```csharp
+[Axent]
 public sealed record GetOrderQuery(Guid OrderId) : ICacheableQuery<OrderDto>
 {
     public string CacheKey => $"order:{OrderId}";
@@ -58,6 +59,7 @@ The handler itself does not need any special caching logic.
 CacheEntryOptions lets you control how long an item should stay in the cache.
 
 ```c#
+[Axent]
 public sealed record GetDashboardQuery(Guid UserId) : ICacheableQuery<DashboardDto>
 {
     public string CacheKey => $"dashboard:{UserId}";
@@ -86,6 +88,7 @@ Supported options
 A request can decide to bypass the cache completely.
 
 ```csharp
+[Axent]
 public sealed record SearchProductsQuery(string Term, bool ForceRefresh)
     : ICacheableQuery<SearchProductsResponse>
 {

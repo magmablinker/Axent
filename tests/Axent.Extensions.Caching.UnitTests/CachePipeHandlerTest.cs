@@ -29,7 +29,7 @@ public sealed class CachePipeHandlerTest : TestBase
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         // Act
-        var response = await sender.SendAsync(query);
+        var response = await sender.SendAsync(query, TestContext.Current.CancellationToken);
 
         // Assert
         await _mockCache.Received(1).GetAsync<string>(query.CacheKey, Arg.Any<CancellationToken>());
@@ -48,7 +48,7 @@ public sealed class CachePipeHandlerTest : TestBase
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         // Act
-        var response = await sender.SendAsync(query);
+        var response = await sender.SendAsync(query, TestContext.Current.CancellationToken);
 
         // Assert
         await _mockCache.Received(0).GetAsync<string>(query.CacheKey, Arg.Any<CancellationToken>());
