@@ -8,6 +8,10 @@
 - Improve source generator performance
     - Introduce `AxentRequestAttribute` for marking commands/queries/requests
 
+### Bugs Fixed
+
+- Update Scriban to 7.2.0 to avoid vulnerability of previous version
+
 ## [2.0.2]
 
 ### Features Added
