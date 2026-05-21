@@ -50,7 +50,7 @@ public sealed class AuthorizationPipeTests : TestBase
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         // Act
-        var result = await sender.SendAsync(query);
+        var result = await sender.SendAsync(query, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equivalent(expected, result);
@@ -81,7 +81,7 @@ public sealed class AuthorizationPipeTests : TestBase
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         // Act
-        var result = await sender.SendAsync(query);
+        var result = await sender.SendAsync(query, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.Equivalent(expected, result);

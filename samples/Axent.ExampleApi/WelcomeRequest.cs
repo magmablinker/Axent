@@ -1,9 +1,11 @@
+using Axent.Abstractions.Attributes;
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Requests;
 using Axent.Abstractions.Services;
 
 namespace Axent.ExampleApi;
 
+[Axent]
 internal sealed record WelcomeRequest : IRequest<string>;
 
 internal sealed class WelcomeRequestHandler : IRequestHandler<WelcomeRequest, string>

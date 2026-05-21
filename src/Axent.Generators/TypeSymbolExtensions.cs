@@ -7,34 +7,42 @@ internal static class TypeSymbolExtensions
     extension(INamedTypeSymbol symbol)
     {
         public bool IsRequestFamilyInterface()
-            => symbol.IsAxentRequestInterface("IRequest`1")
-               || symbol.IsAxentRequestInterface("ICommand`1")
-               || symbol.IsAxentRequestInterface("IQuery`1")
-               || symbol.IsAxentRequestInterface("ICacheableQuery`1");
+        {
+            if (symbol.TypeArguments.Length != 1)
+            {
+                return false;
+            }
+
+            var originalDefinition = symbol.OriginalDefinition;
+
+            return originalDefinition.IsAxentAbstractionsInterface("IRequest`1")
+                   || originalDefinition.IsAxentAbstractionsInterface("ICommand`1")
+                   || originalDefinition.IsAxentAbstractionsInterface("IQuery`1")
+                   || originalDefinition.IsAxentAbstractionsInterface("ICacheableQuery`1");
+        }
 
         public bool IsCommandInterface()
-            => symbol.IsAxentRequestInterface("ICommand`1");
+        {
+            return symbol.OriginalDefinition.IsAxentAbstractionsInterface("ICommand`1");
+        }
 
         public bool IsCacheableQueryInterface()
-            => symbol.IsAxentRequestInterface("ICacheableQuery`1");
+        {
+            return symbol.OriginalDefinition.IsAxentAbstractionsInterface("ICacheableQuery`1");
+        }
 
-        private bool IsAxentRequestInterface(string metadataName)
-            => symbol is
+        private bool IsAxentAbstractionsInterface(string metadataName)
+        {
+            if (!StringComparer.Ordinal.Equals(symbol.MetadataName, metadataName))
             {
-                MetadataName: var currentMetadataName,
-                ContainingNamespace:
-                {
-                    Name: "Requests",
-                    ContainingNamespace:
-                    {
-                        Name: "Abstractions",
-                        ContainingNamespace:
-                        {
-                            Name: "Axent",
-                            ContainingNamespace.IsGlobalNamespace: true
-                        }
-                    }
-                }
-            } && currentMetadataName == metadataName;
+                return false;
+            }
+
+            var containingNamespace = symbol.ContainingNamespace.ToDisplayString();
+
+            return containingNamespace.StartsWith(
+                "Axent.Abstractions",
+                StringComparison.Ordinal);
+        }
     }
 }

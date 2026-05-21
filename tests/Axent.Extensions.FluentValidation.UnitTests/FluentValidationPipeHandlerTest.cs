@@ -24,11 +24,11 @@ public sealed class FluentValidationPipeHandlerTest : TestBase
         await using var scope = ServiceProvider.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
         var validator = scope.ServiceProvider.GetRequiredService<IValidator<TestCommand>>();
-        var validationResult = await validator.ValidateAsync(command);
+        var validationResult = await validator.ValidateAsync(command, TestContext.Current.CancellationToken);
         var errorFactory = scope.ServiceProvider.GetRequiredService<IFluentValidationErrorFactory>();
 
         // Act
-        var response = await sender.SendAsync(command);
+        var response = await sender.SendAsync(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(response.IsFailure);
@@ -45,7 +45,7 @@ public sealed class FluentValidationPipeHandlerTest : TestBase
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         // Act
-        var response = await sender.SendAsync(command);
+        var response = await sender.SendAsync(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(response.IsSuccess);
@@ -60,7 +60,7 @@ public sealed class FluentValidationPipeHandlerTest : TestBase
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         // Act
-        var response = await sender.SendAsync(query);
+        var response = await sender.SendAsync(query, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(response.IsSuccess);

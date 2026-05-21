@@ -40,6 +40,7 @@ Add the [Authorize] attribute to a request to require authorization before the h
 ```csharp
 using Microsoft.AspNetCore.Authorization;
 
+[Axent]
 [Authorize(Policy = "AtLeast21")]
 public sealed record ProtectedQuery : IQuery<Unit>;
 
@@ -58,6 +59,7 @@ Use [Authorize] without additional parameters when any authenticated user should
 ```csharp
 using Microsoft.AspNetCore.Authorization;
 
+[Axent]
 [Authorize]
 public sealed record GetProfileQuery : IQuery<UserProfileDto>;
 ```
@@ -68,6 +70,7 @@ You can also use role-based authorization.
 ```csharp
 using Microsoft.AspNetCore.Authorization;
 
+[Axent]
 [Authorize(Roles = "Admin")]
 public sealed record DeleteUserCommand(Guid UserId) : ICommand<Unit>;
 ```
@@ -77,6 +80,7 @@ public sealed record DeleteUserCommand(Guid UserId) : ICommand<Unit>;
 ```csharp
 using Microsoft.AspNetCore.Authorization;
 
+[Axent]
 [AllowAnonymous]
 public sealed record LoginCommand(string Email, string Password) : ICommand<LoginResponse>;
 ```
@@ -90,6 +94,7 @@ using Microsoft.AspNetCore.Authorization;
 
 public sealed class MustOwnOrderRequirement : IAuthorizationRequirement;
 
+[Axent]
 [Authorize(Policy = "MustOwnOrder")]
 public sealed record GetOrderQuery(Guid OrderId) : IQuery<OrderDto>;
 

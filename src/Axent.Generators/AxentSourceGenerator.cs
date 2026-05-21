@@ -1,3 +1,6 @@
+#pragma warning disable RS2008
+
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
@@ -12,128 +15,23 @@ namespace Axent.Generators;
 [Generator]
 public sealed class AxentSourceGenerator : IIncrementalGenerator
 {
-    private const string PipelinesFile = "Pipelines.g.cs";
-    private const string HandlerPipeFile = "HandlerPipe.g.cs";
-    private const string RequestModuleFile = "RequestModule.g.cs";
-    private const string RegistrarFile = "Registrar.g.cs";
+    private const string AxentAttributeMetadataName =
+        "Axent.Abstractions.Attributes.AxentAttribute";
 
-    public void Initialize(IncrementalGeneratorInitializationContext context)
-    {
-        var requestTypes =
-            context.SyntaxProvider
-                .CreateSyntaxProvider(
-                    predicate: static (node, _) =>
-                        node is ClassDeclarationSyntax or RecordDeclarationSyntax,
-                    transform: static (ctx, ct) => GetRequestInfo(ctx, ct))
-                .Where(static info => info is not null)
-                .Collect();
+    private const string TemplateResourcePrefix =
+        "Axent.Generators.Templates.";
 
-        var assemblyName = context.CompilationProvider
-            .Select(static (compilation, _) => compilation.AssemblyName ?? "Assembly");
+    private static readonly DiagnosticDescriptor _templateMissingDiagnostic =
+        new(
+            "AXENT001",
+            "Template missing",
+            "Template '{0}' could not be found",
+            "AxentSourceGenerator",
+            DiagnosticSeverity.Error,
+            true);
 
-        var input = requestTypes.Combine(assemblyName);
-
-        context.RegisterSourceOutput(
-            input,
-            static (spc, source) => Execute(spc, source.Left, source.Right));
-    }
-
-    private static RequestTypeInfo? GetRequestInfo(
-        GeneratorSyntaxContext ctx,
-        CancellationToken ct)
-    {
-        ct.ThrowIfCancellationRequested();
-
-        if (ctx.SemanticModel.GetDeclaredSymbol(ctx.Node, ct) is not INamedTypeSymbol symbol
-            || symbol.IsAbstract
-            || symbol.IsStatic)
-        {
-            return null;
-        }
-
-        var requestInterface = symbol.AllInterfaces
-            .FirstOrDefault(static i => i.IsRequestFamilyInterface());
-
-        if (requestInterface is null || requestInterface.TypeArguments.Length != 1)
-        {
-            return null;
-        }
-
-        var responseType = requestInterface.TypeArguments[0];
-
-        var isCommand = symbol.AllInterfaces.Any(static i => i.IsCommandInterface());
-
-        var isCacheable = symbol.AllInterfaces.Any(static i => i.IsCacheableQueryInterface());
-
-        return new RequestTypeInfo(
-            RequestFullName: symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            ResponseFullName: responseType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
-            SymbolName: symbol.Name,
-            IsCommand: isCommand,
-            IsCacheable: isCacheable);
-    }
-
-    private static void Execute(
-        SourceProductionContext ctx,
-        ImmutableArray<RequestTypeInfo?> types,
-        string assemblyName)
-    {
-        var requests = types
-            .OfType<RequestTypeInfo>()
-            .GroupBy(t => t.RequestFullName)
-            .Select(g => g.First())
-            .OrderBy(t => t.RequestFullName)
-            .ToImmutableArray();
-
-        if (requests.Length == 0)
-        {
-            return;
-        }
-
-        var registrarTypeName = CreateRegistrarTypeName(assemblyName);
-
-        ctx.AddSource(PipelinesFile,
-            SourceText.From(RenderTemplate(requests, registrarTypeName, GetTemplate("Pipeline", ctx)), Encoding.UTF8));
-
-        ctx.AddSource(HandlerPipeFile,
-            SourceText.From(RenderTemplate(requests, registrarTypeName, GetTemplate("HandlerPipe", ctx)), Encoding.UTF8));
-
-        ctx.AddSource(RequestModuleFile,
-            SourceText.From(RenderTemplate(requests, registrarTypeName, GetTemplate("RequestModule", ctx)), Encoding.UTF8));
-
-        ctx.AddSource(RegistrarFile,
-            SourceText.From(RenderTemplate(requests, registrarTypeName, GetTemplate("Registrar", ctx)), Encoding.UTF8));
-    }
-
-    private static Template? GetTemplate(string name, SourceProductionContext ctx)
-    {
-        using var stream = Assembly
-            .GetExecutingAssembly()
-            .GetManifestResourceStream($"Axent.Generators.Templates.{name}.sbntxt");
-
-        if (stream is null)
-        {
-            var templateMissing = new DiagnosticDescriptor(
-                "AXENT001",
-                "Template missing",
-                "Template '{0}' could not be found",
-                "AxentSourceGenerator",
-                DiagnosticSeverity.Error,
-                true);
-
-            ctx.ReportDiagnostic(Diagnostic.Create(templateMissing, Location.None, name));
-            return null;
-        }
-
-        using var reader = new StreamReader(stream);
-        var template = Template.Parse(reader.ReadToEnd());
-
-        if (!template.HasErrors)
-        {
-            return template;
-        }
-
-        var templateError = new DiagnosticDescriptor(
+    private static readonly DiagnosticDescriptor _templateErrorDiagnostic =
+        new(
             "AXENT002",
             "Template error",
             "Template '{0}' has errors: '{1}'",
@@ -141,49 +39,258 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
             DiagnosticSeverity.Error,
             true);
 
-        ctx.ReportDiagnostic(Diagnostic.Create(
-            templateError,
-            Location.None,
-            name,
-            string.Join(", ", template.Messages.ToList())));
+    private static readonly ConcurrentDictionary<string, TemplateLoadResult> _templateCache = new();
 
-        return null;
+    public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        var requests =
+            context.SyntaxProvider
+                .ForAttributeWithMetadataName(
+                    fullyQualifiedMetadataName: AxentAttributeMetadataName,
+                    predicate: static (node, _) => node is TypeDeclarationSyntax,
+                    transform: static (ctx, ct) => GetRequestInfo(ctx, ct))
+                .Where(static request => request is not null)
+                .Select(static (request, _) => request!);
+
+        context.RegisterSourceOutput(
+            requests,
+            static (ctx, request) => EmitRequest(ctx, request));
+
+        var registrations = requests
+            .Select(static (request, _) => new RequestRegistrationInfo(
+                request.RequestFullName,
+                request.GeneratedTypeName))
+            .Collect()
+            .Select(static (items, _) => new UniqueRegistrations(items)); 
+
+        var assemblyName =
+            context.CompilationProvider
+                .Select(static (compilation, _) => compilation.AssemblyName ?? "Assembly");
+
+        var registrarInput = registrations.Combine(assemblyName);
+
+        context.RegisterSourceOutput(
+            registrarInput,
+            static (ctx, input) => EmitRegistrar(ctx, input.Left.Items, input.Right));
     }
 
-    private static string RenderTemplate(
-        ImmutableArray<RequestTypeInfo> types,
-        string registrarTypeName,
-        Template? template)
+    private static RequestTypeInfo? GetRequestInfo(
+        GeneratorAttributeSyntaxContext ctx,
+        CancellationToken ct)
     {
-        if (template is null)
+        ct.ThrowIfCancellationRequested();
+
+        if (ctx.TargetSymbol is not INamedTypeSymbol symbol)
         {
-            return string.Empty;
+            return null;
         }
 
-        var context = new TemplateContext();
-        var scriptObject = new ScriptObject();
-
-        scriptObject.Import(new
+        if (symbol.IsAbstract || symbol.IsStatic)
         {
-            Types = types,
+            return null;
+        }
+
+        if (symbol.TypeKind is not TypeKind.Class and not TypeKind.Struct)
+        {
+            return null;
+        }
+
+        var requestInterface = symbol.AllInterfaces
+            .FirstOrDefault(static candidate => candidate.IsRequestFamilyInterface());
+
+        if (requestInterface is null || requestInterface.TypeArguments.Length != 1)
+        {
+            return null;
+        }
+
+        var requestFullName =
+            symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+        var responseFullName =
+            requestInterface.TypeArguments[0].ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+        var isCommand =
+            symbol.AllInterfaces.Any(static candidate => candidate.IsCommandInterface());
+
+        var isCacheable =
+            symbol.AllInterfaces.Any(static candidate => candidate.IsCacheableQueryInterface());
+
+        var generatedTypeName =
+            CreateGeneratedTypeName(symbol.Name, requestFullName);
+
+        return new RequestTypeInfo(
+            RequestFullName: requestFullName,
+            ResponseFullName: responseFullName,
+            SymbolName: symbol.Name,
+            GeneratedTypeName: generatedTypeName,
+            IsCommand: isCommand,
+            IsCacheable: isCacheable);
+    }
+
+    private static void EmitRequest(
+        SourceProductionContext ctx,
+        RequestTypeInfo request)
+    {
+        ctx.CancellationToken.ThrowIfCancellationRequested();
+
+        var handlerPipe = RenderTemplate(ctx, "HandlerPipe", new
+        {
+            Type = request
+        });
+
+        if (handlerPipe is not null)
+        {
+            ctx.AddSource(
+                $"{request.GeneratedTypeName}.HandlerPipe.g.cs",
+                SourceText.From(handlerPipe, Encoding.UTF8));
+        }
+
+        var pipeline = RenderTemplate(ctx, "Pipeline", new
+        {
+            Type = request
+        });
+
+        if (pipeline is not null)
+        {
+            ctx.AddSource(
+                $"{request.GeneratedTypeName}.Pipeline.g.cs",
+                SourceText.From(pipeline, Encoding.UTF8));
+        }
+
+        var requestModule = RenderTemplate(ctx, "RequestModule", new
+        {
+            Type = request
+        });
+
+        if (requestModule is not null)
+        {
+            ctx.AddSource(
+                $"{request.GeneratedTypeName}.RequestModule.g.cs",
+                SourceText.From(requestModule, Encoding.UTF8));
+        }
+    }
+
+    private static void EmitRegistrar(
+        SourceProductionContext ctx,
+        ImmutableArray<RequestRegistrationInfo> registrations,
+        string assemblyName)
+    {
+        ctx.CancellationToken.ThrowIfCancellationRequested();
+
+        var uniqueRegistrations = registrations
+            .GroupBy(static registration => registration.RequestFullName, StringComparer.Ordinal)
+            .Select(static group => group.First())
+            .OrderBy(static registration => registration.RequestFullName, StringComparer.Ordinal)
+            .ToImmutableArray();
+
+        if (uniqueRegistrations.Length == 0)
+        {
+            return;
+        }
+
+        var registrarTypeName = CreateRegistrarTypeName(assemblyName);
+
+        var registrar = RenderTemplate(ctx, "Registrar", new
+        {
+            Types = uniqueRegistrations,
             RegistrarTypeName = registrarTypeName
         });
 
-        context.PushGlobal(scriptObject);
+        if (registrar is null)
+        {
+            return;
+        }
 
-        return template.Render(context);
+        ctx.AddSource(
+            $"{registrarTypeName}.g.cs",
+            SourceText.From(registrar, Encoding.UTF8));
+    }
+
+    private static string? RenderTemplate(
+        SourceProductionContext ctx,
+        string name,
+        object model)
+    {
+        var result = GetTemplate(name);
+
+        if (result.Missing)
+        {
+            ctx.ReportDiagnostic(Diagnostic.Create(
+                _templateMissingDiagnostic,
+                Location.None,
+                name));
+
+            return null;
+        }
+
+        if (!string.IsNullOrWhiteSpace(result.Error))
+        {
+            ctx.ReportDiagnostic(Diagnostic.Create(
+                _templateErrorDiagnostic,
+                Location.None,
+                name,
+                result.Error));
+
+            return null;
+        }
+
+        if (result.Template is null)
+        {
+            ctx.ReportDiagnostic(Diagnostic.Create(
+                _templateMissingDiagnostic,
+                Location.None,
+                name));
+
+            return null;
+        }
+
+        var templateContext = new TemplateContext();
+        var scriptObject = new ScriptObject();
+
+        scriptObject.Import(model);
+        templateContext.PushGlobal(scriptObject);
+
+        return result.Template.Render(templateContext);
+    }
+
+    private static TemplateLoadResult GetTemplate(string name)
+    {
+        return _templateCache.GetOrAdd(name, static templateName =>
+        {
+            var resourceName = $"{TemplateResourcePrefix}{templateName}.sbntxt";
+
+            using var stream = Assembly
+                .GetExecutingAssembly()
+                .GetManifestResourceStream(resourceName);
+
+            if (stream is null)
+            {
+                return TemplateLoadResult.TemplateMissing;
+            }
+
+            using var reader = new StreamReader(stream);
+            var template = Template.Parse(reader.ReadToEnd());
+
+            if (!template.HasErrors)
+            {
+                return TemplateLoadResult.Success(template);
+            }
+
+            var errors = string.Join(
+                ", ",
+                template.Messages.Select(static message => message.ToString()));
+
+            return TemplateLoadResult.Failure(errors);
+        });
     }
 
     private static string CreateRegistrarTypeName(string assemblyName)
     {
         var builder = new StringBuilder("AxentGeneratedModuleRegistrar");
 
-        foreach (var character in assemblyName)
+        foreach (var character in assemblyName.Where(char.IsLetterOrDigit))
         {
-            if (char.IsLetterOrDigit(character))
-            {
-                builder.Append(character);
-            }
+            builder.Append(character);
         }
 
         if (builder.Length == "AxentGeneratedModuleRegistrar".Length)
@@ -192,5 +299,60 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
         }
 
         return builder.ToString();
+    }
+
+    private static string CreateGeneratedTypeName(
+        string symbolName,
+        string requestFullName)
+    {
+        return $"Axent{CreateIdentifierFragment(symbolName)}_{StableHash(requestFullName)}";
+    }
+
+    private static string CreateIdentifierFragment(string value)
+    {
+        var builder = new StringBuilder();
+
+        foreach (var character in value.Where(char.IsLetterOrDigit))
+        {
+            builder.Append(character);
+        }
+
+        return builder.Length == 0
+            ? "Request"
+            : builder.ToString();
+    }
+
+    private static string StableHash(string value)
+    {
+        unchecked
+        {
+            const ulong offset = 14695981039346656037UL;
+            const ulong prime = 1099511628211UL;
+
+            var hash = offset;
+
+            foreach (var character in value)
+            {
+                hash ^= character;
+                hash *= prime;
+            }
+
+            return hash.ToString("X16");
+        }
+    }
+
+    private sealed record TemplateLoadResult(
+        Template? Template,
+        bool Missing,
+        string? Error)
+    {
+        public static TemplateLoadResult TemplateMissing { get; } =
+            new(null, true, null);
+
+        public static TemplateLoadResult Success(Template template) =>
+            new(template, false, null);
+
+        public static TemplateLoadResult Failure(string error) =>
+            new(null, false, error);
     }
 }

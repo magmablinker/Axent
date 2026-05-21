@@ -39,7 +39,7 @@ public sealed class TransactionalHandlerTest : TestBase
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         // Act
-        var response = await sender.SendAsync(command);
+        var response = await sender.SendAsync(command, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(response.IsSuccess);
@@ -55,7 +55,7 @@ public sealed class TransactionalHandlerTest : TestBase
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
         // Act
-        var response = await sender.SendAsync(query);
+        var response = await sender.SendAsync(query, TestContext.Current.CancellationToken);
 
         // Assert
         Assert.True(response.IsSuccess);

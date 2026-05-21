@@ -1,9 +1,11 @@
+using Axent.Abstractions.Attributes;
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Requests;
 using Axent.Abstractions.Services;
 
 namespace Axent.Tests.Shared;
 
+[Axent]
 public sealed record TestCommand(string Message) : ICommand<Unit>;
 
 internal sealed class TestCommandHandler : IRequestHandler<TestCommand, Unit>

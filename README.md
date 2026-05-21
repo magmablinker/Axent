@@ -61,6 +61,7 @@ using Axent.Abstractions.Services;
 
 namespace Axent.ExampleApi;
 
+[Axent]
 internal sealed record ExampleQuery(string Message) : IQuery<Unit>;
 
 internal sealed class ExampleQueryHandler : IRequestHandler<ExampleQuery, Unit>
