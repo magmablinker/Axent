@@ -14,11 +14,14 @@ internal sealed class TransactionPipe<TRequest, TResponse> : ITransactionPipe<TR
         _factory = factory;
     }
 
-    public async ValueTask<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
+    public async ValueTask<Response<TResponse>> ProcessAsync(
+        TRequest request,
+        AxentPipelineContinuation<TRequest, TResponse> next,
+        CancellationToken cancellationToken = default)
     {
         using var scope = _factory.Create();
 
-        var response = await chain.NextAsync(context, cancellationToken);
+        var response = await next(request, cancellationToken);
         if (response.IsSuccess)
         {
             scope.Complete();

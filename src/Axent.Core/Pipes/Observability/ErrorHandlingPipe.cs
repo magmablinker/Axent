@@ -18,13 +18,13 @@ public sealed class ErrorHandlingPipe<TRequest, TResponse>
     }
 
     public async ValueTask<Response<TResponse>> ProcessAsync(
-        IPipelineChain<TRequest, TResponse> chain,
-        RequestContext<TRequest> context,
+        TRequest request,
+        AxentPipelineContinuation<TRequest, TResponse> next,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            return await chain.NextAsync(context, cancellationToken);
+            return await next(request, cancellationToken);
         }
         catch (Exception e)
         {

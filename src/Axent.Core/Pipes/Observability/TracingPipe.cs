@@ -13,18 +13,21 @@ internal sealed class TracingPipe<TRequest, TResponse> : IAxentPipe<TRequest, TR
         _activityFactory = activityFactory;
     }
 
-    public async ValueTask<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
+    public async ValueTask<Response<TResponse>> ProcessAsync(
+        TRequest request,
+        AxentPipelineContinuation<TRequest, TResponse> next,
+        CancellationToken cancellationToken = default)
     {
         using var activity = _activityFactory.Create<TRequest>();
         if (activity is null)
         {
-            return await chain.NextAsync(context, cancellationToken);
+            return await next(request, cancellationToken);
         }
 
         try
         {
             activity.SetTag(ActivityTags.RequestType, typeof(TRequest).Name);
-            var result = await chain.NextAsync(context, cancellationToken);
+            var result = await next(request, cancellationToken);
             activity.SetStatus(ActivityStatusCode.Ok);
             return result;
         }

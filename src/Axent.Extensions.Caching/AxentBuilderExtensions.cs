@@ -1,4 +1,5 @@
 using Axent.Abstractions.Builders;
+using Axent.Abstractions.Pipelines;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -10,7 +11,7 @@ public static class AxentBuilderExtensions
     {
         builder.Services.AddMemoryCache();
         builder.Services.TryAddSingleton<ICache, InMemoryCache>();
-        builder.AddPipe(typeof(CachePipe<,>));
+        builder.Services.AddScoped(typeof(ICachePipe<,>), typeof(CachePipe<,>));
         return builder;
     }
 }

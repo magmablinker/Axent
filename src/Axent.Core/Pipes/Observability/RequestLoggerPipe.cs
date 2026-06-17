@@ -17,14 +17,17 @@ internal sealed class RequestLoggerPipe<TRequest, TResponse> : IAxentPipe<TReque
         _logger = logger;
     }
 
-    public async ValueTask<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
+    public async ValueTask<Response<TResponse>> ProcessAsync(
+        TRequest request,
+        AxentPipelineContinuation<TRequest, TResponse> next,
+        CancellationToken cancellationToken = default)
     {
         _logger.RequestStarted(_requestType.Name);
         var sw = Stopwatch.StartNew();
 
         try
         {
-            var response = await chain.NextAsync(context, cancellationToken);
+            var response = await next(request, cancellationToken);
             _logger.RequestFinished(_requestType.Name, sw.ElapsedMilliseconds, _responseType.Name);
             return response;
         }

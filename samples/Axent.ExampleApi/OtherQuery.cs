@@ -30,10 +30,13 @@ internal sealed class OtherQueryPipe : IAxentPipe<OtherQuery, OtherResponse>
         _logger = logger;
     }
 
-    public ValueTask<Response<OtherResponse>> ProcessAsync(IPipelineChain<OtherQuery, OtherResponse> chain, RequestContext<OtherQuery> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<OtherResponse>> ProcessAsync(
+        OtherQuery request,
+        AxentPipelineContinuation<OtherQuery, OtherResponse> next,
+        CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("I only run during other request");
-        return chain.NextAsync(context, cancellationToken);
+        return next(request, cancellationToken);
     }
 }
 
@@ -46,9 +49,9 @@ internal sealed class OtherQueryHandler : IRequestHandler<OtherQuery, OtherRespo
         _logger = logger;
     }
 
-    public ValueTask<Response<OtherResponse>> HandleAsync(RequestContext<OtherQuery> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<OtherResponse>> HandleAsync(OtherQuery request, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Message from request '{Message}'", context.Request.Message);
-        return ValueTask.FromResult(Response.Success(new OtherResponse { Message = context.Request.Message }));
+        _logger.LogInformation("Message from request '{Message}'", request.Message);
+        return ValueTask.FromResult(Response.Success(new OtherResponse { Message = request.Message }));
     }
 }

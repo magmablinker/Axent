@@ -28,11 +28,11 @@ internal sealed class ExampleCommandHandler : IRequestHandler<ExampleCommand, Ex
         _logger = logger;
     }
 
-    public ValueTask<Response<ExampleResponse>> HandleAsync(RequestContext<ExampleCommand> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<ExampleResponse>> HandleAsync(ExampleCommand request, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Message from request '{Message}'", context.Request.Message);
+        _logger.LogInformation("Message from request '{Message}'", request.Message);
         return ValueTask.FromResult(Random.Next(1, 100) % 2 == 0
             ? throw new InvalidOperationException()
-            : Response.Success(new ExampleResponse { Message = context.Request.Message }));
+            : Response.Success(new ExampleResponse { Message = request.Message }));
     }
 }

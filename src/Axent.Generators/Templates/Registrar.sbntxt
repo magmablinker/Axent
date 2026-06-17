@@ -15,9 +15,7 @@ public sealed class {{ registrar_type_name }} : IAxentModuleRegistrar
     public void Register(IServiceCollection services)
     {
 {{- for type in types }}
-        services.AddScoped<{{ type.generated_type_name }}HandlerPipe>();
-        services.AddScoped<{{ type.generated_type_name }}Pipeline>();
-        services.AddSingleton<IAxentRequestModule, {{ type.generated_type_name }}RequestModule>();
+        services.AddScoped<IRequestSender<{{ type.request_full_name }}, {{ type.response_full_name }}>, {{ type.generated_type_name }}Sender>();
 {{- end }}
     }
 }

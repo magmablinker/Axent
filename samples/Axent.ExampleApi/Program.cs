@@ -25,13 +25,13 @@ builder.Services.AddAxent(o => builder.Configuration.Bind("AppSettings:Axent", o
 
 var app = builder.Build();
 
-app.MapGet("/", async (ISender sender, CancellationToken cancellationToken) =>
+app.MapGet("/", async (IRequestSender<WelcomeRequest, string> sender, CancellationToken cancellationToken) =>
 {
     var response = await sender.SendAsync(new WelcomeRequest(), cancellationToken);
     return response.ToResult();
 });
 
-app.MapGet("/api/example", async (ISender sender, CancellationToken cancellationToken) =>
+app.MapGet("/api/example", async (IRequestSender<ExampleCommand, ExampleResponse> sender, CancellationToken cancellationToken) =>
 {
     var request = new ExampleCommand
     {
@@ -42,7 +42,7 @@ app.MapGet("/api/example", async (ISender sender, CancellationToken cancellation
     return response.ToResult();
 });
 
-app.MapGet("/api/other", async (ISender sender, CancellationToken cancellationToken) =>
+app.MapGet("/api/other", async (IRequestSender<OtherQuery, OtherResponse> sender, CancellationToken cancellationToken) =>
 {
     var request = new OtherQuery
     {

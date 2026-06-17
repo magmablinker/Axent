@@ -23,7 +23,7 @@ Register caching and configure it.
 
 ```csharp
 builder.Services.AddAxent()
-    .AddCaching();
+    .AddCache();
 ```
 > The default `ICache` implementation uses `IMemoryCache`
 

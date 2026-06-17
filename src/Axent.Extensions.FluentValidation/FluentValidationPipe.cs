@@ -16,14 +16,17 @@ internal sealed class FluentValidationPipe<TRequest, TResponse> : IAxentPipe<TRe
         _errorFactory = errorFactory;
     }
 
-    public async ValueTask<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
+    public async ValueTask<Response<TResponse>> ProcessAsync(
+        TRequest request,
+        AxentPipelineContinuation<TRequest, TResponse> next,
+        CancellationToken cancellationToken = default)
     {
         if (_validators.Length == 0)
         {
-            return await chain.NextAsync(context, cancellationToken);
+            return await next(request, cancellationToken);
         }
 
-        var validationContext = new ValidationContext<TRequest>(context.Request);
+        var validationContext = new ValidationContext<TRequest>(request);
         var validationFailures = new List<ValidationFailure>();
         foreach (var validator in _validators)
         {
@@ -33,7 +36,7 @@ internal sealed class FluentValidationPipe<TRequest, TResponse> : IAxentPipe<TRe
 
         if (validationFailures.Count == 0)
         {
-            return await chain.NextAsync(context, cancellationToken);
+            return await next(request, cancellationToken);
         }
 
         return _errorFactory.Create<TResponse>(validationFailures);

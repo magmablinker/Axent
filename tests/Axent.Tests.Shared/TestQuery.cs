@@ -10,7 +10,7 @@ public sealed record TestQuery : IQuery<Unit>;
 
 internal sealed class TestQueryHandler : IRequestHandler<TestQuery, Unit>
 {
-    public ValueTask<Response<Unit>> HandleAsync(RequestContext<TestQuery> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<Unit>> HandleAsync(TestQuery request, CancellationToken cancellationToken = default)
     {
         return ValueTask.FromResult(Response.Success(Unit.Value));
     }

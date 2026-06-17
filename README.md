@@ -7,7 +7,7 @@
 [![Downloads](https://img.shields.io/nuget/dt/Axent.Core.svg)](https://www.nuget.org/packages/Axent.Core/)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=magmablinker_Axent&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=magmablinker_Axent)
 
-**Axent** is a source-generated CQRS library for modern .NET with typed pipelines and ASP.NET Core integration. It is currently ~2x faster than [MediatR (v12.5)](https://github.com/LuckyPennySoftware/MediatR) with fewer allocations.
+**Axent** is a source-generated CQRS library for modern .NET with typed pipelines and ASP.NET Core integration.
 
 ---
 
@@ -45,7 +45,7 @@ dotnet add package Axent.Extensions.AspNetCore
 #### 2. Register Services
 ```csharp
 builder.Services.AddAxent()
-    .AddRequestHandlers(AssemblyProvider.Current);
+    .AddRequestHandlersFromAssemblyContaining<ExampleQueryHandler>();
 ```
 
 #### 3. Create a Request and Handler
@@ -73,24 +73,26 @@ internal sealed class ExampleQueryHandler : IRequestHandler<ExampleQuery, Unit>
         _logger = logger;
     }
 
-    public ValueTask<Response<Unit>> HandleAsync(RequestContext<ExampleQuery> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<Unit>> HandleAsync(ExampleQuery request, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Message from request '{Message}'", context.Request.Message);
+        _logger.LogInformation("Message from request '{Message}'", request.Message);
         return ValueTask.FromResult(Response.Success(Unit.Value));
     }
 }
 ```
 
 #### 4. Send a Request
-Inject ISender into endpoints or application services.
+Inject `IRequestSender<TRequest, TResponse>` into endpoints or application services for the generated typed fast path.
 
 ```csharp
-app.MapGet("/api/example", async (ISender sender, CancellationToken cancellationToken) =>
+app.MapGet("/api/example", async (IRequestSender<ExampleQuery, Unit> sender, CancellationToken cancellationToken) =>
 {
     var response = await sender.SendAsync(new ExampleQuery("Hello World!"), cancellationToken);
     return response.ToResult();
 });
 ```
+
+`ISender` is still available for dynamic dispatch, but it is a compatibility adapter over generated typed senders and is not the recommended hot path.
 ---
 
 Alternatively using the template

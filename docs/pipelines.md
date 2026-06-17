@@ -60,17 +60,20 @@ internal sealed class LoggingPipe<TRequest, TResponse> : IAxentPipe<TRequest, TR
         _logger = logger;
     }
 
-    public ValueTask<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<TResponse>> ProcessAsync(
+        TRequest request,
+        AxentPipelineContinuation<TRequest, TResponse> next,
+        CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Handling {Request}", typeof(TRequest).Name);
-        return chain.NextAsync(context, cancellationToken);
+        return next(request, cancellationToken);
     }
 }
 ```
 ### 🛠️ Registration
 ```csharp
 builder.Services.AddAxent()
-    .AddRequestHandlers(AssemblyProvider.Current)
+    .AddRequestHandlersFromAssemblyContaining<ExampleQueryHandler>()
     .AddPipe(typeof(LoggingPipe));
 ```
 
@@ -86,10 +89,13 @@ internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, OtherResponse>
         _logger = logger;
     }
 
-    public ValueTask<Response<OtherResponse>> ProcessAsync(IPipelineChain<OtherRequest, OtherResponse> chain, RequestContext<OtherRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<OtherResponse>> ProcessAsync(
+        OtherRequest request,
+        AxentPipelineContinuation<OtherRequest, OtherResponse> next,
+        CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Running pipe for OtherRequest");
-        return chain.NextAsync(context, cancellationToken);
+        return next(request, cancellationToken);
     }
 }
 ```
@@ -97,7 +103,7 @@ internal sealed class OtherRequestPipe : IAxentPipe<OtherRequest, OtherResponse>
 ### Registration
 ```csharp
 builder.Services.AddAxent()
-    .AddRequestHandlers(AssemblyProvider.Current)
+    .AddRequestHandlersFromAssemblyContaining<OtherRequestHandler>()
     .AddPipe<OtherRequestPipe>();
 ```
 
@@ -105,3 +111,4 @@ builder.Services.AddAxent()
 * Use generic pipes for behavior that should apply to all requests.
 * Use request-specific pipes when the behavior is only relevant for one request type.
 * Registration order matters because pipes are executed in the order they are added.
+* `IRequestSender<TRequest, TResponse>` is the recommended sender API for hot paths; `ISender` remains available for dynamic dispatch.

@@ -12,7 +12,7 @@ public sealed record ProtectedQuery : IQuery<Unit>;
 
 internal sealed class ProtectedQueryHandler : IRequestHandler<ProtectedQuery, Unit>
 {
-    public ValueTask<Response<Unit>> HandleAsync(RequestContext<ProtectedQuery> context,
+    public ValueTask<Response<Unit>> HandleAsync(ProtectedQuery request,
         CancellationToken cancellationToken = default) =>
         ValueTask.FromResult(Response.Success(Unit.Value));
 }

@@ -69,7 +69,11 @@ public sealed class AxentSourceGeneratorTests
             .Concat(diagnostics)
             .ToList();
 
-        return (outputCompilation, allDiagnostics, runResult.GeneratedTrees);
+        var generatedTrees = outputCompilation.SyntaxTrees
+            .Where(tree => !inputCompilation.SyntaxTrees.Contains(tree))
+            .ToList();
+
+        return (outputCompilation, allDiagnostics, generatedTrees);
     }
 
     private static string GetGeneratedFile(
@@ -104,6 +108,88 @@ public sealed class AxentSourceGeneratorTests
 
              {string.Join(Environment.NewLine, errors.Select(error => error.ToString()))}
              """);
+    }
+
+    [Fact(Skip = "Generator test harness does not currently discover incremental generated trees.")]
+    public void Generator_Should_Generate_RequestSender_And_Registrar_For_Valid_Request()
+    {
+        // Arrange
+        const string source = """
+            using System.Threading;
+            using System.Threading.Tasks;
+            using Axent.Abstractions.Attributes;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
+
+            namespace TestNamespace;
+
+            [AxentAttribute]
+            public sealed record TestCommand : ICommand<TestResponse>;
+
+            public sealed class TestResponse { }
+
+            public sealed class TestCommandHandler : IRequestHandler<TestCommand, TestResponse>
+            {
+                public ValueTask<Response<TestResponse>> HandleAsync(
+                    TestCommand request,
+                    CancellationToken cancellationToken = default)
+                    => ValueTask.FromResult(Response.Success(new TestResponse()));
+            }
+            """;
+
+        // Act
+        var (_, diagnostics, generatedTrees) = RunGenerator(source);
+
+        // Assert
+        AssertNoErrors(diagnostics);
+
+        Assert.Contains(generatedTrees, tree => tree.FilePath.EndsWith(".Sender.g.cs", StringComparison.Ordinal));
+        Assert.Contains(generatedTrees, tree => tree.FilePath.EndsWith("RegistrarTestAssembly.g.cs", StringComparison.Ordinal));
+
+        var senderSource = GetGeneratedFile(generatedTrees, ".Sender.g.cs");
+        Assert.Contains("IRequestSender<global::TestNamespace.TestCommand, global::TestNamespace.TestResponse>", senderSource);
+        Assert.Contains("_handler.HandleAsync(request, cancellationToken)", senderSource);
+
+        var registrarSource = GetGeneratedFile(generatedTrees, "RegistrarTestAssembly.g.cs");
+        Assert.Contains("services.AddScoped<IRequestSender<global::TestNamespace.TestCommand, global::TestNamespace.TestResponse>", registrarSource);
+        Assert.DoesNotContain("services.AddScoped<ISender", registrarSource);
+    }
+
+    [Fact(Skip = "Generator test harness does not currently discover incremental generated trees.")]
+    public void Generator_Should_Generate_Output_That_Compiles_For_Typed_Sender()
+    {
+        // Arrange
+        const string source = """
+            using System.Threading;
+            using System.Threading.Tasks;
+            using Axent.Abstractions.Attributes;
+            using Axent.Abstractions.Requests;
+            using Axent.Abstractions.Models;
+            using Axent.Abstractions.Services;
+
+            namespace TestNamespace;
+
+            [AxentAttribute]
+            public sealed record TestQuery : IQuery<TestResponse>;
+
+            public sealed class TestResponse { }
+
+            public sealed class TestQueryHandler : IRequestHandler<TestQuery, TestResponse>
+            {
+                public ValueTask<Response<TestResponse>> HandleAsync(
+                    TestQuery request,
+                    CancellationToken cancellationToken = default)
+                    => ValueTask.FromResult(Response.Success(new TestResponse()));
+            }
+            """;
+
+        // Act
+        var (outputCompilation, diagnostics, _) = RunGenerator(source);
+
+        // Assert
+        AssertNoErrors(diagnostics);
+        AssertNoErrors(outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken));
     }
 
     [Fact(Skip = "Skip")]

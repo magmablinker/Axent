@@ -1,9 +1,11 @@
+using Axent.Abstractions.Attributes;
 using Axent.Abstractions.Requests;
 using Axent.Abstractions.Services;
 using Axent.Abstractions.Models;
 
 namespace Axent.Templates.MinimalApi.UseCases.Welcome;
 
+[Axent]
 internal sealed record WeatherForecastQuery : IQuery<WeatherForecast[]>;
 
 internal sealed class WeatherForecastQueryHandler : IRequestHandler<WeatherForecastQuery, WeatherForecast[]>
@@ -13,7 +15,7 @@ internal sealed class WeatherForecastQueryHandler : IRequestHandler<WeatherForec
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     ];
 
-    public ValueTask<Response<WeatherForecast[]>> HandleAsync(RequestContext<WeatherForecastQuery> context,
+    public ValueTask<Response<WeatherForecast[]>> HandleAsync(WeatherForecastQuery request,
         CancellationToken cancellationToken = default)
     {
         var rng = new Random();
