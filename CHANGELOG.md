@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.0.1]
+
+#### Bugs Fixed
+
+- Fix issue which caused whole request module to be instantiated on every request
+
 ## [3.0.0]
 
 ### Breaking Changes

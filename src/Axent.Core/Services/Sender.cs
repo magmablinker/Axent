@@ -6,10 +6,15 @@ namespace Axent.Core.Services;
 
 internal sealed class Sender : ISender
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly IReadOnlyDictionary<Type, IRequestRoute> _routes;
 
-    public Sender(IEnumerable<IAxentRequestModule> modules)
+    public Sender(
+        IServiceProvider serviceProvider,
+        IEnumerable<IAxentRequestModule> modules)
     {
+        _serviceProvider = serviceProvider;
+
         var routes = new Dictionary<Type, IRequestRoute>();
         var builder = new RequestRouteBuilder(routes);
 
@@ -33,12 +38,13 @@ internal sealed class Sender : ISender
                 $"No pipeline registered for request type '{requestType.FullName}'.");
         }
 
-        return route.SendAsync(request, cancellationToken);
+        return route.SendAsync(_serviceProvider, request, cancellationToken);
     }
 
     private interface IRequestRoute
     {
         ValueTask<Response<TResponse>> SendAsync<TResponse>(
+            IServiceProvider serviceProvider,
             IRequest<TResponse> request,
             CancellationToken cancellationToken);
     }
@@ -46,19 +52,23 @@ internal sealed class Sender : ISender
     private sealed class RequestRoute<TRequest, TResponse> : IRequestRoute
         where TRequest : IRequest<TResponse>
     {
-        private readonly Func<TRequest, CancellationToken, ValueTask<Response<TResponse>>> _handler;
+        private readonly AxentRequestExecutor<TRequest, TResponse> _executor;
 
-        public RequestRoute(
-            Func<TRequest, CancellationToken, ValueTask<Response<TResponse>>> handler)
+        public RequestRoute(AxentRequestExecutor<TRequest, TResponse> executor)
         {
-            _handler = handler;
+            _executor = executor;
         }
 
         public async ValueTask<Response<TActualResponse>> SendAsync<TActualResponse>(
+            IServiceProvider serviceProvider,
             IRequest<TActualResponse> request,
             CancellationToken cancellationToken)
         {
-            var response = await _handler((TRequest)request, cancellationToken);
+            var response = await _executor(
+                serviceProvider,
+                (TRequest)request,
+                cancellationToken);
+
             return (Response<TActualResponse>)(object)response;
         }
     }
@@ -73,12 +83,11 @@ internal sealed class Sender : ISender
         }
 
         public void Map<TRequest, TResponse>(
-            Func<TRequest, CancellationToken, ValueTask<Response<TResponse>>> handler)
-            where TRequest : IRequest<TResponse>
+            AxentRequestExecutor<TRequest, TResponse> executor) where TRequest : IRequest<TResponse>
         {
             var requestType = typeof(TRequest);
 
-            if (!_routes.TryAdd(requestType, new RequestRoute<TRequest, TResponse>(handler)))
+            if (!_routes.TryAdd(requestType, new RequestRoute<TRequest, TResponse>(executor)))
             {
                 throw new InvalidOperationException(
                     $"More than one Axent route was registered for request type '{requestType.FullName}'.");
