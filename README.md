@@ -108,30 +108,31 @@ To learn more about the features of Axent, checkout the [documentation](https://
 
 ### Axent (Source Generated Dispatch)
 ```
-BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.7840)
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.8655)
 Unknown processor
-.NET SDK 10.0.200-preview.0.26103.119
-  [Host]     : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
-  DefaultJob : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
+.NET SDK 11.0.100-preview.5.26302.115
+  [Host]     : .NET 10.0.9 (10.0.926.27113), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
+  DefaultJob : .NET 10.0.9 (10.0.926.27113), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
 ```
-| Method                                    |     Mean |    Error |   StdDev | Ratio | RatioSD |   Gen0 | Allocated | Alloc Ratio |
-|-------------------------------------------|---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
-| &#39;SendAsync (cold)&#39;                | 36.74 ns | 0.741 ns | 1.702 ns |  1.00 |    0.06 | 0.0196 |     328 B |        1.00 |
-| &#39;SendAsync (warm, same instance)&#39; | 33.97 ns | 0.423 ns | 0.353 ns |  0.93 |    0.04 | 0.0181 |     304 B |        0.93 |
+| Method                            | Mean     | Error    | StdDev   | Ratio | RatioSD | Gen0   | Allocated | Alloc Ratio |
+|---------------------------------- |---------:|---------:|---------:|------:|--------:|-------:|----------:|------------:|
+| &#39;SendAsync (cold)&#39;                | 16.46 ns | 0.524 ns | 1.536 ns |  1.01 |    0.13 | 0.0105 |     176 B |        1.00 |
+| &#39;SendAsync (warm, same instance)&#39; | 14.10 ns | 0.266 ns | 0.337 ns |  0.86 |    0.08 | 0.0091 |     152 B |        0.86 |
 
 
 ### MediatR (v12.5.0)
 ```
-BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.7840)
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.26200.8655)
 Unknown processor
-.NET SDK 10.0.200-preview.0.26103.119
-  [Host]     : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
-  DefaultJob : .NET 8.0.23 (8.0.2325.60607), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
+.NET SDK 11.0.100-preview.5.26302.115
+  [Host]     : .NET 10.0.9 (10.0.926.27113), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI [AttachedDebugger]
+  DefaultJob : .NET 10.0.9 (10.0.926.27113), X64 RyuJIT AVX-512F+CD+BW+DQ+VL+VBMI
 ```
-| Method                               |     Mean |    Error |   StdDev |   Gen0 | Allocated |
-|--------------------------------------|---------:|---------:|---------:|-------:|----------:|
-| &#39;Send (cold)&#39;                | 79.03 ns | 1.526 ns | 2.713 ns | 0.0257 |     432 B |
-| &#39;Send (warm, same instance)&#39; | 79.21 ns | 1.566 ns | 3.783 ns | 0.0243 |     408 B |
+| Method                       | Mean     | Error    | StdDev   | Gen0   | Allocated |
+|----------------------------- |---------:|---------:|---------:|-------:|----------:|
+| &#39;Send (cold)&#39;                | 49.26 ns | 0.941 ns | 1.813 ns | 0.0191 |     320 B |
+| &#39;Send (warm, same instance)&#39; | 47.44 ns | 0.983 ns | 2.115 ns | 0.0176 |     296 B |
+
 
 ## 🤝 Contributing
 Contributions are welcome.

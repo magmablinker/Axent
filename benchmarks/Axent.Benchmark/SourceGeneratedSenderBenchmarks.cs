@@ -10,7 +10,7 @@ namespace Axent.Benchmark;
 [SimpleJob]
 public class SourceGeneratedSenderBenchmarks
 {
-    private ISender _sender = null!;
+    private IRequestHandler<PingRequest, PingResponse> _handler = null!;
     private PingRequest _request = null!;
 
     [GlobalSetup]
@@ -23,19 +23,19 @@ public class SourceGeneratedSenderBenchmarks
             .AddHandler<PingHandler>();
 
         var provider = services.BuildServiceProvider();
-        _sender = provider.GetRequiredService<ISender>();
+        _handler = provider.GetRequiredService<IRequestHandler<PingRequest, PingResponse>>();
         _request = new("hello");
     }
 
     [Benchmark(Baseline = true, Description = "SendAsync (cold)")]
     public async Task<Response<PingResponse>> SendAsync_Cold()
     {
-        return await _sender.SendAsync(new PingRequest("hello"));
+        return await _handler.HandleAsync(new PingRequest("hello"));
     }
 
     [Benchmark(Description = "SendAsync (warm, same instance)")]
     public async Task<Response<PingResponse>> SendAsync_Warm()
     {
-        return await _sender.SendAsync(_request);
+        return await _handler.HandleAsync(_request);
     }
 }
