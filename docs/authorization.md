@@ -47,7 +47,7 @@ public sealed record ProtectedQuery : IQuery<Unit>;
 internal sealed class ProtectedQueryHandler : IRequestHandler<ProtectedQuery, Unit>
 {
     public ValueTask<Response<Unit>> HandleAsync(
-        RequestContext<ProtectedQuery> context,
+        ProtectedQuery request,
         CancellationToken cancellationToken = default) =>
         ValueTask.FromResult(Response.Success(Unit.Value));
 }

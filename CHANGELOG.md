@@ -1,5 +1,23 @@
 # Changelog
 
+## [4.0.0]
+
+### Breaking Changes
+
+- Replace `RequestContext<TRequest>` handler input with direct `TRequest` input.
+- Replace `IPipelineChain<TRequest, TResponse>` with generated continuation delegates for custom pipes.
+- Replace generated pipeline/request-module dispatch with generated `IRequestSender<TRequest, TResponse>` implementations.
+
+### Features Added
+
+- Add `IRequestSender<TRequest, TResponse>` as the recommended high-performance sender API.
+- Keep `ISender` as a dynamic compatibility adapter that resolves generated typed senders across multiple assemblies.
+- Make `ResponseBase` and `Response<TResponse>` readonly structs to reduce framework allocations.
+
+### Bugs Fixed
+
+- Fix multi-assembly `ISender` dispatch where one generated assembly sender could shadow requests generated in another assembly.
+
 ## [3.0.1]
 
 #### Bugs Fixed
@@ -12,7 +30,7 @@
 
 - Update Solution to .NET 10
 - Improve source generator performance
-    - Introduce `AxentRequestAttribute` for marking commands/queries/requests
+  - Introduce `AxentRequestAttribute` for marking commands/queries/requests
 
 ### Bugs Fixed
 
@@ -56,6 +74,7 @@
 ## [1.2.1]
 
 ### Features Added
+
 - Add `dotnet new axent-api` template for easier setup
 - Add `Axent.Extensions.FluentValidation` for validation
 

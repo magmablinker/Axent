@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Axent.Core" Version="*" />
-      <PackageReference Include="Axent.Extensions.AspNetCore" Version="*" />
+      <ProjectReference Include="..\Axent.Core\Axent.Core.csproj" />
+      <ProjectReference Include="..\Axent.Extensions.AspNetCore\Axent.Extensions.AspNetCore.csproj" />
     </ItemGroup>
 </Project>

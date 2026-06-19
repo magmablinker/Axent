@@ -59,6 +59,7 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
         var registrations = requests
             .Select(static (request, _) => new RequestRegistrationInfo(
                 request.RequestFullName,
+                request.ResponseFullName,
                 request.GeneratedTypeName))
             .Collect()
             .Select(static (items, _) => new UniqueRegistrations(items)); 
@@ -133,40 +134,16 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
     {
         ctx.CancellationToken.ThrowIfCancellationRequested();
 
-        var handlerPipe = RenderTemplate(ctx, "HandlerPipe", new
+        var sender = RenderTemplate(ctx, "RequestSender", new
         {
             Type = request
         });
 
-        if (handlerPipe is not null)
+        if (sender is not null)
         {
             ctx.AddSource(
-                $"{request.GeneratedTypeName}.HandlerPipe.g.cs",
-                SourceText.From(handlerPipe, Encoding.UTF8));
-        }
-
-        var pipeline = RenderTemplate(ctx, "Pipeline", new
-        {
-            Type = request
-        });
-
-        if (pipeline is not null)
-        {
-            ctx.AddSource(
-                $"{request.GeneratedTypeName}.Pipeline.g.cs",
-                SourceText.From(pipeline, Encoding.UTF8));
-        }
-
-        var requestModule = RenderTemplate(ctx, "RequestModule", new
-        {
-            Type = request
-        });
-
-        if (requestModule is not null)
-        {
-            ctx.AddSource(
-                $"{request.GeneratedTypeName}.RequestModule.g.cs",
-                SourceText.From(requestModule, Encoding.UTF8));
+                $"{request.GeneratedTypeName}.Sender.g.cs",
+                SourceText.From(sender, Encoding.UTF8));
         }
     }
 

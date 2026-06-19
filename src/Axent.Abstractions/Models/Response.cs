@@ -9,7 +9,7 @@ public interface IResponse
     bool IsFailure { get; }
 }
 
-public class ResponseBase : IResponse
+public readonly struct ResponseBase : IResponse
 {
     public Error? Error { get; init; }
 
@@ -20,7 +20,7 @@ public class ResponseBase : IResponse
     public bool IsFailure => !IsSuccess;
 }
 
-public sealed class Response<TResponse> : IResponse
+public readonly struct Response<TResponse> : IResponse
 {
     public Error? Error { get; init; }
 

@@ -13,7 +13,7 @@ public sealed record TestCacheQuery(string Message, bool BypassCache = false) : 
 
 internal sealed class TestCacheQueryHandler : IRequestHandler<TestCacheQuery, string>
 {
-    public ValueTask<Response<string>> HandleAsync(RequestContext<TestCacheQuery> context,
+    public ValueTask<Response<string>> HandleAsync(TestCacheQuery request,
         CancellationToken cancellationToken = default) =>
-        ValueTask.FromResult(Response.Success(context.Request.Message));
+        ValueTask.FromResult(Response.Success(request.Message));
 }

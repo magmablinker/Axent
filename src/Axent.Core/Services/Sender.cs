@@ -1,97 +1,65 @@
+using System.Collections.Concurrent;
+using System.Reflection;
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Requests;
 using Axent.Abstractions.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Axent.Core.Services;
 
 internal sealed class Sender : ISender
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IReadOnlyDictionary<Type, IRequestRoute> _routes;
+    private static readonly MethodInfo _sendCoreMethod =
+        typeof(Sender).GetMethod(nameof(SendCoreAsync), BindingFlags.NonPublic | BindingFlags.Static)
+        ?? throw new InvalidOperationException("Could not locate Axent sender dispatch method.");
 
-    public Sender(
-        IServiceProvider serviceProvider,
-        IEnumerable<IAxentRequestModule> modules)
+    private readonly IServiceProvider _serviceProvider;
+
+    public Sender(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-
-        var routes = new Dictionary<Type, IRequestRoute>();
-        var builder = new RequestRouteBuilder(routes);
-
-        foreach (var module in modules)
-        {
-            module.RegisterRoutes(builder);
-        }
-
-        _routes = routes;
     }
 
     public ValueTask<Response<TResponse>> SendAsync<TResponse>(
         IRequest<TResponse> request,
+        CancellationToken cancellationToken = default)
+    {
+        var invoker = SenderInvokerCache<TResponse>.Get(request.GetType());
+        return invoker(_serviceProvider, request, cancellationToken);
+    }
+
+    private static ValueTask<Response<TResponse>> SendCoreAsync<TRequest, TResponse>(
+        IServiceProvider serviceProvider,
+        IRequest<TResponse> request,
         CancellationToken cancellationToken)
-    {
-        var requestType = request.GetType();
-
-        if (!_routes.TryGetValue(requestType, out var route))
-        {
-            throw new InvalidOperationException(
-                $"No pipeline registered for request type '{requestType.FullName}'.");
-        }
-
-        return route.SendAsync(_serviceProvider, request, cancellationToken);
-    }
-
-    private interface IRequestRoute
-    {
-        ValueTask<Response<TResponse>> SendAsync<TResponse>(
-            IServiceProvider serviceProvider,
-            IRequest<TResponse> request,
-            CancellationToken cancellationToken);
-    }
-
-    private sealed class RequestRoute<TRequest, TResponse> : IRequestRoute
         where TRequest : IRequest<TResponse>
     {
-        private readonly AxentRequestExecutor<TRequest, TResponse> _executor;
-
-        public RequestRoute(AxentRequestExecutor<TRequest, TResponse> executor)
+        var sender = serviceProvider.GetService<IRequestSender<TRequest, TResponse>>();
+        if (sender is null)
         {
-            _executor = executor;
+            throw new InvalidOperationException(
+                $"No pipeline registered for request type '{typeof(TRequest).FullName}'.");
         }
 
-        public async ValueTask<Response<TActualResponse>> SendAsync<TActualResponse>(
-            IServiceProvider serviceProvider,
-            IRequest<TActualResponse> request,
-            CancellationToken cancellationToken)
-        {
-            var response = await _executor(
-                serviceProvider,
-                (TRequest)request,
-                cancellationToken);
-
-            return (Response<TActualResponse>)(object)response;
-        }
+        return sender.SendAsync((TRequest)request, cancellationToken);
     }
 
-    private sealed class RequestRouteBuilder : IAxentRequestRouteBuilder
+    private delegate ValueTask<Response<TResponse>> SenderInvoker<TResponse>(
+        IServiceProvider serviceProvider,
+        IRequest<TResponse> request,
+        CancellationToken cancellationToken);
+
+    private static class SenderInvokerCache<TResponse>
     {
-        private readonly Dictionary<Type, IRequestRoute> _routes;
+        private static readonly ConcurrentDictionary<Type, SenderInvoker<TResponse>> _invokers = new();
 
-        public RequestRouteBuilder(Dictionary<Type, IRequestRoute> routes)
+        public static SenderInvoker<TResponse> Get(Type requestType)
         {
-            _routes = routes;
-        }
-
-        public void Map<TRequest, TResponse>(
-            AxentRequestExecutor<TRequest, TResponse> executor) where TRequest : IRequest<TResponse>
-        {
-            var requestType = typeof(TRequest);
-
-            if (!_routes.TryAdd(requestType, new RequestRoute<TRequest, TResponse>(executor)))
+            return _invokers.GetOrAdd(requestType, static type =>
             {
-                throw new InvalidOperationException(
-                    $"More than one Axent route was registered for request type '{requestType.FullName}'.");
-            }
+                var method = _sendCoreMethod.MakeGenericMethod(type, typeof(TResponse));
+                return (SenderInvoker<TResponse>)method.CreateDelegate(typeof(SenderInvoker<TResponse>));
+            });
         }
     }
 }

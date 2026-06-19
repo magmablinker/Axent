@@ -13,9 +13,12 @@ public sealed class ExampleRequestPipe<TRequest, TResponse> : IAxentPipe<TReques
         _logger = logger;
     }
 
-    public ValueTask<Response<TResponse>> ProcessAsync(IPipelineChain<TRequest, TResponse> chain, RequestContext<TRequest> context, CancellationToken cancellationToken = default)
+    public ValueTask<Response<TResponse>> ProcessAsync(
+        TRequest request,
+        AxentPipelineContinuation<TRequest, TResponse> next,
+        CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("This pipe runs during every request.");
-        return chain.NextAsync(context, cancellationToken);
+        return next(request, cancellationToken);
     }
 }

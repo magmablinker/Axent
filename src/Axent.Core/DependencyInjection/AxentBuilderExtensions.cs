@@ -1,10 +1,8 @@
 using System.Reflection;
 using Axent.Abstractions.Builders;
-using Axent.Abstractions.Factories;
 using Axent.Abstractions.Pipelines;
 using Axent.Abstractions.Services;
 using Axent.Core.Attributes;
-using Axent.Core.Factories;
 using Axent.Core.Pipes.Observability;
 using Axent.Core.Pipes.Transactions;
 using Axent.Core.Services;
@@ -31,10 +29,7 @@ public static class AxentBuilderExtensions
         var options = new AxentOptions();
         configure?.Invoke(options);
 
-        builder.Services
-            .AddSingleton(options)
-            .AddScoped<IRequestContextFactory, RequestContextFactory>();
-
+        builder.Services.AddSingleton(options);
         builder.Services.TryAddScoped<ISender, Sender>();
 
         if (options.Transactions.UseTransactions)
@@ -52,7 +47,6 @@ public static class AxentBuilderExtensions
             builder.AddPipe(typeof(RequestLoggerPipe<,>));
         }
 
-        builder.AddSourceGeneratedServices(assemblies);
         builder.RegisterGeneratedModules(assemblies);
 
         return builder;
@@ -113,30 +107,6 @@ public static class AxentBuilderExtensions
     {
         builder.Services.AddSingleton<ITransactionScopeFactory, TransactionScopeFactory>();
         builder.Services.AddScoped(typeof(ITransactionPipe<,>), typeof(TransactionPipe<,>));
-    }
-
-    private static void AddSourceGeneratedServices(
-        this AxentBuilder builder,
-        Assembly[] assemblies)
-    {
-        var pipelineType = typeof(IPipeline);
-        var handlerPipeType = typeof(IHandlerPipe);
-
-        var allTypes = assemblies.SelectMany(a => a.GetTypes())
-            .ToList();
-
-        foreach (var type in allTypes.Where(t => t is { IsAbstract: false, IsInterface: false }))
-        {
-            if (pipelineType.IsAssignableFrom(type))
-            {
-                builder.Services.AddScoped(type);
-            }
-
-            if (handlerPipeType.IsAssignableFrom(type))
-            {
-                builder.Services.AddScoped(type);
-            }
-        }
     }
 
     private static void RegisterGeneratedModules(

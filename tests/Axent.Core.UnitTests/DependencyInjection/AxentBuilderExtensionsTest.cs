@@ -1,5 +1,4 @@
 using Axent.Core.DependencyInjection;
-using Axent.Core.Factories;
 using Axent.Core.Pipes.Observability;
 using Axent.Core.Pipes.Transactions;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,9 +25,6 @@ public sealed class AxentBuilderExtensionsTest
         // Assert
         Assert.Contains(serviceCollection, s =>
             s.ImplementationInstance?.GetType() == typeof(AxentOptions) && s.Lifetime == ServiceLifetime.Singleton);
-        Assert.Contains(serviceCollection, s =>
-            s.ImplementationType == typeof(RequestContextFactory) && s.Lifetime == ServiceLifetime.Scoped);
-
         Assert.Contains(serviceCollection, s =>
             s.ImplementationType == typeof(TransactionScopeFactory) && s.Lifetime == ServiceLifetime.Singleton);
         Assert.Contains(serviceCollection, s =>
