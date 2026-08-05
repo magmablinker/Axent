@@ -16,6 +16,10 @@ IAxentPipe<TRequest, TResponse>
 ```
 Pipes run in the order they are registered and execute before the request handler.
 
+Built-in safety stages have fixed outer ordering: authorization runs first, followed by a command
+transaction or query cache when present, then custom `IAxentPipe` registrations. Registration
+order still controls the order among custom pipes.
+
 ## 📦 Built-in Pipes
 Axent includes several pipeline features out of the box. See the [configuration](https://github.com/magmablinker/Axent/blob/main/docs/configuration.md) documentation for more details.
 

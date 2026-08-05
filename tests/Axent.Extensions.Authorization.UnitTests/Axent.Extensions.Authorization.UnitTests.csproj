@@ -6,5 +6,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Axent.Tests.Shared\Axent.Tests.Shared.csproj" />
     <ProjectReference Include="..\..\src\Axent.Extensions.Authorization\Axent.Extensions.Authorization.csproj" />
+    <ProjectReference Include="..\..\src\Axent.Extensions.Caching\Axent.Extensions.Caching.csproj" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,6 @@
 using Axent.Abstractions.Requests;
 using Axent.Core.Attributes;
+using System.Globalization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.DependencyInjection;
@@ -108,6 +109,103 @@ public sealed class AxentSourceGeneratorTests
 
              {string.Join(Environment.NewLine, errors.Select(error => error.ToString()))}
              """);
+    }
+
+    [Fact]
+    public void Generator_should_warn_when_authorized_cacheable_query_has_implicit_global_scope()
+    {
+        // Arrange
+        const string source = """
+            using System;
+            using Axent.Abstractions.Attributes;
+            using Axent.Abstractions.Requests;
+            using Microsoft.AspNetCore.Authorization;
+
+            namespace Microsoft.AspNetCore.Authorization
+            {
+                public interface IAuthorizeData { }
+
+                [AttributeUsage(AttributeTargets.Class, Inherited = true)]
+                public sealed class AuthorizeAttribute : Attribute, IAuthorizeData { }
+            }
+
+            namespace TestNamespace
+            {
+                [Axent]
+                [Authorize]
+                public sealed record AccountQuery : ICacheableQuery<string>
+                {
+                    public string CacheKey => "account";
+                    public bool BypassCache => false;
+                }
+            }
+            """;
+
+        // Act
+        var (_, diagnostics, _) = RunGenerator(source);
+
+        // Assert
+        var diagnostic = Assert.Single(
+            diagnostics
+                .Where(item => item.Id == "AXENT003")
+                .DistinctBy(item => (
+                    item.Id,
+                    item.Location.SourceSpan,
+                    item.GetMessage(CultureInfo.InvariantCulture))));
+        Assert.Equal(DiagnosticSeverity.Warning, diagnostic.Severity);
+        Assert.Contains(
+            "AccountQuery",
+            diagnostic.GetMessage(CultureInfo.InvariantCulture),
+            StringComparison.Ordinal);
+        Assert.NotEqual(Location.None, diagnostic.Location);
+    }
+
+    [Theory]
+    [InlineData("public CacheScope CacheScope => CacheScope.Global;", "")]
+    [InlineData("", "[AllowAnonymous]")]
+    public void Generator_should_not_warn_when_global_sharing_is_explicit_or_anonymous(
+        string cacheScopeMember,
+        string additionalAttribute)
+    {
+        // Arrange
+        var source = $$"""
+            using System;
+            using Axent.Abstractions.Attributes;
+            using Axent.Abstractions.Caching;
+            using Axent.Abstractions.Requests;
+            using Microsoft.AspNetCore.Authorization;
+
+            namespace Microsoft.AspNetCore.Authorization
+            {
+                public interface IAuthorizeData { }
+                public interface IAllowAnonymous { }
+
+                [AttributeUsage(AttributeTargets.Class, Inherited = true)]
+                public sealed class AuthorizeAttribute : Attribute, IAuthorizeData { }
+
+                [AttributeUsage(AttributeTargets.Class, Inherited = true)]
+                public sealed class AllowAnonymousAttribute : Attribute, IAllowAnonymous { }
+            }
+
+            namespace TestNamespace
+            {
+                [Axent]
+                [Authorize]
+                {{additionalAttribute}}
+                public sealed record AccountQuery : ICacheableQuery<string>
+                {
+                    public string CacheKey => "account";
+                    public bool BypassCache => false;
+                    {{cacheScopeMember}}
+                }
+            }
+            """;
+
+        // Act
+        var (_, diagnostics, _) = RunGenerator(source);
+
+        // Assert
+        Assert.DoesNotContain(diagnostics, item => item.Id == "AXENT003");
     }
 
     [Fact(Skip = "Generator test harness does not currently discover incremental generated trees.")]

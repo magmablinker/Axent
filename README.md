@@ -23,6 +23,7 @@
 - Minimal setup and boilerplate
 - Source-generated dispatch — no reflection at runtime
 - Typed pipelines with support for generic and request-specific pipes
+- Response caching with user, tenant, and culture partitioning
 - Separate marker interfaces for commands and queries (`ICommand<TResponse>`, `IQuery<TResponse>`)
 - Built-in support for transactions, logging, and error handling via pipeline options
 - ASP.NET Core integration

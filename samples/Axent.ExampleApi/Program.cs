@@ -19,7 +19,8 @@ builder.Services.AddAxent(o => builder.Configuration.Bind("AppSettings:Axent", o
     .AddRequestHandlersFromAssembly(applicationAssembly)
     .AddTracing()
     .AddAutoFluentValidation()
-    .AddCache()
+    .AddCache(options => options.EmitScopeTags = true)
+    .AddHttpCacheScopes()
     .AddPipe<OtherQueryPipe>()
     .AddPipe(typeof(ExampleRequestPipe<,>));
 
@@ -27,7 +28,7 @@ var app = builder.Build();
 
 app.MapGet("/", async (IRequestSender<WelcomeRequest, string> sender, CancellationToken cancellationToken) =>
 {
-    var response = await sender.SendAsync(new WelcomeRequest(), cancellationToken);
+    var response = await sender.SendAsync(new(), cancellationToken);
     return response.ToResult();
 });
 

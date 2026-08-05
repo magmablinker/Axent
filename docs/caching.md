@@ -23,9 +23,17 @@ Register caching and configure it.
 
 ```csharp
 builder.Services.AddAxent()
-    .AddCache();
+    .AddCache(options =>
+    {
+        options.UnresolvedScopeBehavior = UnresolvedCacheScopeBehavior.Bypass;
+        options.EmitScopeTags = true;
+    });
 ```
 > The default `ICache` implementation uses `IMemoryCache`
+
+`UnresolvedScopeBehavior` defaults to `Bypass`, which executes the handler without reading or
+writing a potentially unsafe cache entry. Set it to `Fail` to return an internal-server-error
+response instead. Axent never falls back from an unresolved scoped key to a global key.
 
 ## ✅ Create a cacheable query
 A request opts into caching by implementing ICacheableQuery<TResponse>.
@@ -51,6 +59,110 @@ public sealed record GetOrderQuery(Guid OrderId) : ICacheableQuery<OrderDto>
     public bool BypassCache => false;
 }
 ```
+
+## Partition entries by ambient scope
+
+`CacheScope` separates entries that have the same request key but belong to different callers or
+runtime contexts. The default is `CacheScope.Global`, which shares one entry across all callers.
+Use flags to select one or more dimensions:
+
+* `CacheScope.User` partitions by the current user.
+* `CacheScope.Tenant` partitions by the current tenant.
+* `CacheScope.Culture` partitions by `CultureInfo.CurrentUICulture`.
+
+```csharp
+[Axent]
+public sealed record GetDashboardQuery : ICacheableQuery<DashboardDto>
+{
+    public string CacheKey => "dashboard";
+    public bool BypassCache => false;
+    public CacheScope CacheScope => CacheScope.User | CacheScope.Tenant | CacheScope.Culture;
+}
+```
+
+Culture resolution is registered by `AddCache`. For ASP.NET Core user and tenant resolution,
+register the claims-backed providers:
+
+```csharp
+builder.Services.AddAxent()
+    .AddCache()
+    .AddHttpCacheScopes(options =>
+    {
+        options.UserClaimTypes = [ClaimTypes.NameIdentifier, "sub"];
+        options.TenantClaimTypes = ["tenant_id", "tid"];
+    });
+```
+
+`AddHttpCacheScopes` is provided by `Axent.Extensions.AspNetCore`. User scope requires an
+authenticated principal. Tenant scope accepts a tenant claim from either an authenticated or an
+anonymous principal. When no configured claim contains a non-empty value, the dimension is
+unresolved and `UnresolvedScopeBehavior` applies.
+
+To replace resolution for a built-in dimension, implement `ICacheScopeProvider` and register it
+after the built-in providers. The last provider registered for a dimension wins.
+
+```csharp
+public sealed class TenantContextCacheScopeProvider(ITenantContext tenantContext)
+    : ICacheScopeProvider
+{
+    public CacheScope Scope => CacheScope.Tenant;
+
+    public ValueTask<string?> GetDiscriminatorAsync(
+        CancellationToken cancellationToken = default) =>
+        ValueTask.FromResult<string?>(tenantContext.TenantId);
+}
+
+builder.Services.AddAxent()
+    .AddCache()
+    .AddHttpCacheScopes()
+    .AddCacheScopeProvider<TenantContextCacheScopeProvider>();
+```
+
+The source generator emits warning `AXENT003` when an authorized cacheable query does not declare
+`CacheScope`. Declare an appropriate scope, or explicitly return `CacheScope.Global` when sharing
+is intentional. Authorization always runs before caching, so a cache hit cannot bypass the
+authorization gate.
+
+## Build request keys with dependencies
+
+`ICacheKeyProvider<TRequest>` can replace a request's `CacheKey` when key construction requires
+services. Scope composition still wraps the returned key. Returning `null` bypasses caching for
+that request.
+
+```csharp
+public sealed class ProductCacheKeyProvider(IProductVersionStore versions)
+    : ICacheKeyProvider<GetProductQuery>
+{
+    public async ValueTask<string?> GetCacheKeyAsync(
+        GetProductQuery request,
+        CancellationToken cancellationToken = default)
+    {
+        var version = await versions.GetVersionAsync(request.ProductId, cancellationToken);
+        return version is null ? null : $"product:{request.ProductId}:v{version}";
+    }
+}
+
+builder.Services.AddAxent()
+    .AddCache()
+    .AddCacheKeyProvider<GetProductQuery, ProductCacheKeyProvider>();
+```
+
+## Evict scoped entries
+
+Enable `EmitScopeTags` to add an implicit tag for every resolved scope dimension. These tags can
+invalidate all entries for one user or tenant without depending on the internal cache-key format.
+
+```csharp
+builder.Services.AddAxent()
+    .AddCache(options => options.EmitScopeTags = true);
+
+await cache.RemoveByTagsAsync(
+    [CacheScopeTags.User(userId), CacheScopeTags.Tenant(tenantId)],
+    cancellationToken);
+```
+
+Scope-tag emission is disabled by default because the in-memory provider retains one expiration
+token per distinct tag until that tag is removed.
 
 ## 🛠️ Create the handler
 The handler itself does not need any special caching logic.
@@ -190,6 +302,7 @@ await cache.RemoveByTagsAsync(["orders"], cancellationToken);
 ## 📌 Notes
 * caching is opt-in
 * only requests implementing ICacheableQuery<TResponse> are cached
+* global scope is the default; declare user, tenant, or culture scope for context-specific data
 * handlers do not need to know whether a request is cached
 * ICache is interchangeable, so consumers can plug in their own providers
 * in-memory caching is best for a single application instance

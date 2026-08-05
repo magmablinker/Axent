@@ -39,6 +39,17 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
             DiagnosticSeverity.Error,
             true);
 
+    private static readonly DiagnosticDescriptor _unscopedAuthorizedCacheableQueryDiagnostic =
+        new(
+            "AXENT003",
+            "Authorized cacheable query is not scoped",
+            "Cacheable query '{0}' is authorized but does not declare a CacheScope, so its cache "
+            + "entry is shared by every caller. Declare 'CacheScope' (for example "
+            + "'CacheScope.User') or set it to 'CacheScope.Global' to acknowledge the sharing.",
+            "AxentSourceGenerator",
+            DiagnosticSeverity.Warning,
+            true);
+
     private static readonly ConcurrentDictionary<string, TemplateLoadResult> _templateCache = new();
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -125,7 +136,10 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
             SymbolName: symbol.Name,
             GeneratedTypeName: generatedTypeName,
             IsCommand: isCommand,
-            IsCacheable: isCacheable);
+            IsCacheable: isCacheable,
+            IsAuthorized: isCacheable && symbol.IsAuthorized(),
+            DeclaresCacheScope: isCacheable && symbol.DeclaresCacheScope(),
+            Location: isCacheable ? LocationInfo.From(symbol) : null);
     }
 
     private static void EmitRequest(
@@ -133,6 +147,8 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
         RequestTypeInfo request)
     {
         ctx.CancellationToken.ThrowIfCancellationRequested();
+
+        ReportUnscopedAuthorizedCacheableQuery(ctx, request);
 
         var sender = RenderTemplate(ctx, "RequestSender", new
         {
@@ -145,6 +161,25 @@ public sealed class AxentSourceGenerator : IIncrementalGenerator
                 $"{request.GeneratedTypeName}.Sender.g.cs",
                 SourceText.From(sender, Encoding.UTF8));
         }
+    }
+
+    /// <summary>
+    /// A query worth protecting with <c>[Authorize]</c> almost certainly has a caller-specific
+    /// response, so leaving it on the default global scope is very likely a cross-caller leak.
+    /// </summary>
+    private static void ReportUnscopedAuthorizedCacheableQuery(
+        SourceProductionContext ctx,
+        RequestTypeInfo request)
+    {
+        if (!request.IsCacheable || !request.IsAuthorized || request.DeclaresCacheScope)
+        {
+            return;
+        }
+
+        ctx.ReportDiagnostic(Diagnostic.Create(
+            _unscopedAuthorizedCacheableQueryDiagnostic,
+            request.Location?.ToLocation() ?? Location.None,
+            request.SymbolName));
     }
 
     private static void EmitRegistrar(
