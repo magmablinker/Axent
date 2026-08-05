@@ -1,3 +1,4 @@
+using Axent.Abstractions.Models;
 using Axent.Abstractions.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Primitives;
@@ -6,10 +7,42 @@ namespace Axent.Extensions.Caching;
 
 internal sealed class InMemoryCache(IMemoryCache memoryCache) : ICache, IDisposable
 {
+    private readonly CacheLockProvider _lockProvider = new();
+
     private static readonly StringComparer _tagComparer = StringComparer.Ordinal;
 
     private readonly SemaphoreSlim _tagSemaphore = new(1, 1);
     private readonly Dictionary<string, CancellationTokenSource> _tagTokens = new(_tagComparer);
+
+    public async ValueTask<Response<T>> GetOrCreateAsync<T>(
+        string key,
+        Func<ValueTask<Response<T>>> factory,
+        CacheEntryOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        var cachedValue = await GetAsync<T>(key, cancellationToken);
+        if (cachedValue is not null)
+        {
+            return Response.Success(cachedValue);
+        }
+
+        using var cacheLock = await _lockProvider.AcquireAsync(key, cancellationToken);
+
+        cachedValue = await GetAsync<T>(key, cancellationToken);
+        if (cachedValue is not null)
+        {
+            return Response.Success(cachedValue);
+        }
+
+        var response = await factory();
+        if (response.IsFailure || response.Value is null)
+        {
+            return response;
+        }
+
+        await SetAsync(key, response.Value, options, cancellationToken);
+        return response;
+    }
 
     public ValueTask<T?> GetAsync<T>(
         string key,

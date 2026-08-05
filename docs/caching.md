@@ -31,11 +31,11 @@ builder.Services.AddAxent()
 A request opts into caching by implementing ICacheableQuery<TResponse>.
 
 When a cached request is sent:
-1. Axent checks the cache for the request key
+1. Axent atomically gets or creates the value for the request key
 2. if a cached value exists, the handler is skipped
-3. if no cached value exists, the handler runs normally
+3. concurrent misses allow only one handler execution at a time
 4. successful responses are stored in the cache
-5. later requests with the same cache key reuse the cached response
+5. failed or null responses are returned without being cached
 
 ```csharp
 [Axent]
@@ -110,6 +110,11 @@ If you want to use Redis, a database, or any other storage, implement ICache.
 ```csharp
 public interface ICache
 {
+    ValueTask<Response<T>> GetOrCreateAsync<T>(
+        string key,
+        Func<ValueTask<Response<T>>> factory,
+        CacheEntryOptions? options = null,
+        CancellationToken cancellationToken = default);
     ValueTask<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default);
     ValueTask SetAsync<T>(string key, T value, CacheEntryOptions? options = null, CancellationToken cancellationToken = default);
     ValueTask RemoveAsync(string key, CancellationToken cancellationToken = default);
@@ -122,7 +127,16 @@ Example skeleton
 ```csharp
 public sealed class CustomCache : ICache
 {
-    public ValueTask<CacheResult<T>> GetAsync<T>(string key, CancellationToken cancellationToken = default)
+    public ValueTask<Response<T>> GetOrCreateAsync<T>(
+        string key,
+        Func<ValueTask<Response<T>>> factory,
+        CacheEntryOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ValueTask<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
@@ -143,6 +157,12 @@ public sealed class CustomCache : ICache
     }
 }
 ```
+
+GetOrCreateAsync owns cache stampede protection. An in-memory provider must
+coordinate callers in one process. A distributed provider must coordinate the
+same key across every application instance, recheck the cache after acquiring
+its distributed lock, and cache only successful non-null responses.
+
 Register your implementation:
 
 ```csharp

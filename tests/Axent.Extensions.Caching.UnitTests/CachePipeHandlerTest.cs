@@ -1,4 +1,6 @@
 using Axent.Abstractions.Builders;
+using Axent.Abstractions.Models;
+using Axent.Abstractions.Options;
 using Axent.Abstractions.Services;
 using Axent.Tests.Shared;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,8 +25,12 @@ public sealed class CachePipeHandlerTest : TestBase
         // Arrange
         const string cachedString = "It works!";
         var query = new TestCacheQuery("Hello World!");
-        _mockCache.GetAsync<string>(query.CacheKey, Arg.Any<CancellationToken>())
-            .Returns(cachedString);
+        _mockCache.GetOrCreateAsync<string>(
+                query.CacheKey,
+                Arg.Any<Func<ValueTask<Response<string>>>>(),
+                Arg.Any<CacheEntryOptions>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Response.Success(cachedString));
         await using var scope = ServiceProvider.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
@@ -32,7 +38,11 @@ public sealed class CachePipeHandlerTest : TestBase
         var response = await sender.SendAsync(query, TestContext.Current.CancellationToken);
 
         // Assert
-        await _mockCache.Received(1).GetAsync<string>(query.CacheKey, Arg.Any<CancellationToken>());
+        await _mockCache.Received(1).GetOrCreateAsync<string>(
+            query.CacheKey,
+            Arg.Any<Func<ValueTask<Response<string>>>>(),
+            Arg.Any<CacheEntryOptions>(),
+            Arg.Any<CancellationToken>());
         Assert.Equal(cachedString, response.Value);
     }
 
@@ -40,10 +50,7 @@ public sealed class CachePipeHandlerTest : TestBase
     public async Task SendAsync_should_skip_cache()
     {
         // Arrange
-        const string cachedString = "It works!";
         var query = new TestCacheQuery("Bypass", true);
-        _mockCache.GetAsync<string>(query.CacheKey, Arg.Any<CancellationToken>())
-            .Returns(cachedString);
         await using var scope = ServiceProvider.CreateAsyncScope();
         var sender = scope.ServiceProvider.GetRequiredService<ISender>();
 
@@ -51,7 +58,11 @@ public sealed class CachePipeHandlerTest : TestBase
         var response = await sender.SendAsync(query, TestContext.Current.CancellationToken);
 
         // Assert
-        await _mockCache.Received(0).GetAsync<string>(query.CacheKey, Arg.Any<CancellationToken>());
+        await _mockCache.Received(0).GetOrCreateAsync<string>(
+            query.CacheKey,
+            Arg.Any<Func<ValueTask<Response<string>>>>(),
+            Arg.Any<CacheEntryOptions>(),
+            Arg.Any<CancellationToken>());
         Assert.Equal(query.Message, response.Value);
     }
 }

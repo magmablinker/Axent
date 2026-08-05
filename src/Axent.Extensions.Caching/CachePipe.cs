@@ -18,24 +18,10 @@ internal sealed class CachePipe<TRequest, TResponse>(ICache cache)
             return await next(request, cancellationToken);
         }
 
-        var value = await cache.GetAsync<TResponse>(request.CacheKey, cancellationToken);
-        if (value is not null)
-        {
-            return Response.Success(value);
-        }
-
-        var response = await next(request, cancellationToken);
-        if (!response.IsSuccess || response.Value is null)
-        {
-            return response;
-        }
-
-        await cache.SetAsync(
+        return await cache.GetOrCreateAsync(
             request.CacheKey,
-            response.Value,
+            () => next(request, cancellationToken),
             request.CacheOptions,
             cancellationToken);
-
-        return response;
     }
 }
