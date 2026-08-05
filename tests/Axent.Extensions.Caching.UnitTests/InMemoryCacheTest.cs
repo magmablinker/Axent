@@ -1,5 +1,7 @@
 using System.Net;
+using Axent.Abstractions.Caching;
 using Axent.Abstractions.Models;
+using Axent.Abstractions.Options;
 using Microsoft.Extensions.Caching.Memory;
 using Xunit;
 
@@ -130,4 +132,45 @@ public sealed class InMemoryCacheTest
                 CreateValueAsync,
                 cancellationToken: testCancellationToken)).Value);
     }
+
+    [Fact]
+    public async Task RemoveByTagAsync_should_remove_only_matching_tag_and_scope()
+    {
+        // Arrange
+        using var memoryCache = new MemoryCache(new MemoryCacheOptions());
+        using var inMemoryCache = new InMemoryCache(memoryCache);
+        ICache cache = inMemoryCache;
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        await SetScopedEntryAsync(cache, "user-1-settings", "user-1", "user-settings", cancellationToken);
+        await SetScopedEntryAsync(cache, "user-1-dashboard", "user-1", "dashboard", cancellationToken);
+        await SetScopedEntryAsync(cache, "user-2-settings", "user-2", "user-settings", cancellationToken);
+
+        // Act
+        await cache.RemoveByTagAsync(
+            "user-settings",
+            CacheScope.User,
+            "user-1",
+            cancellationToken);
+
+        // Assert
+        Assert.Null(await cache.GetAsync<string>("user-1-settings", cancellationToken));
+        Assert.Equal("cached", await cache.GetAsync<string>("user-1-dashboard", cancellationToken));
+        Assert.Equal("cached", await cache.GetAsync<string>("user-2-settings", cancellationToken));
+    }
+
+    private static ValueTask SetScopedEntryAsync(
+        ICache cache,
+        string key,
+        string userId,
+        string tag,
+        CancellationToken cancellationToken) =>
+        cache.SetAsync(
+            key,
+            "cached",
+            new CacheEntryOptions
+            {
+                Tags = [tag, CacheScopeTags.User(userId), CacheScopeTags.UserTag(userId, tag)],
+            },
+            cancellationToken);
 }

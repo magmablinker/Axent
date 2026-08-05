@@ -15,7 +15,11 @@ internal sealed class OtherQuery : ICacheableQuery<OtherResponse>
     public string CacheKey => $"{nameof(OtherQuery)}-{Message}";
     public bool BypassCache => false;
     public CacheScope CacheScope => CacheScope.Culture;
-    public CacheEntryOptions CacheOptions => new() { SlidingExpiration = TimeSpan.FromMinutes(5) };
+    public CacheEntryOptions CacheOptions => new()
+    {
+        SlidingExpiration = TimeSpan.FromMinutes(5),
+        Tags = ["other-query"],
+    };
 }
 
 internal sealed class OtherResponse

@@ -1,3 +1,4 @@
+using Axent.Abstractions.Caching;
 using Axent.Abstractions.Services;
 using Axent.Core.DependencyInjection;
 using Axent.Example.Application;
@@ -52,6 +53,20 @@ app.MapGet("/api/other", async (IRequestSender<OtherQuery, OtherResponse> sender
 
     var response = await sender.SendAsync(request, cancellationToken);
     return response.ToResult();
+});
+
+app.MapDelete("/api/other/cache/{cultureName}", async (
+    string cultureName,
+    ICache cache,
+    CancellationToken cancellationToken) =>
+{
+    await cache.RemoveByTagAsync(
+        "other-query",
+        CacheScope.Culture,
+        cultureName,
+        cancellationToken);
+
+    return Results.NoContent();
 });
 
 await app.RunAsync();

@@ -20,6 +20,9 @@ internal static class CacheScopeDimensions
 
     public const CacheScope Known = CacheScope.User | CacheScope.Tenant | CacheScope.Culture;
 
+    public static bool IsSingleDimension(CacheScope scope) => scope is
+        CacheScope.User or CacheScope.Tenant or CacheScope.Culture;
+
     public static string Abbreviate(CacheScope scope) => scope switch
     {
         CacheScope.User => "u",

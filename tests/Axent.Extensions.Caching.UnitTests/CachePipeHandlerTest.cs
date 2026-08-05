@@ -78,13 +78,16 @@ public sealed class CachePipeHandlerTest : TestBase
     {
         // Arrange
         const string expectedKey = "axent:s:u=user%7C42|provided:key";
-        var expectedTag = CacheScopeTags.User("user|42");
-        var query = new ScopedCacheQuery("cache me");
+        const string applicationTag = "user|settings";
+        var expectedScopeTag = CacheScopeTags.User("user|42");
+        var expectedScopedTag = CacheScopeTags.UserTag("user|42", applicationTag);
+        var expectedTags = new[] { applicationTag, expectedScopeTag, expectedScopedTag };
+        var query = new ScopedCacheQuery("cache me", Tag: applicationTag);
 
         _mockCache.GetOrCreateAsync<string>(
                 expectedKey,
                 Arg.Any<Func<ValueTask<Response<string>>>>(),
-                Arg.Is<CacheEntryOptions>(options => options.Tags.SequenceEqual(new[] { expectedTag })),
+                Arg.Is<CacheEntryOptions>(options => options.Tags.SequenceEqual(expectedTags)),
                 Arg.Any<CancellationToken>())
             .Returns(Response.Success("cached"));
 
@@ -99,7 +102,7 @@ public sealed class CachePipeHandlerTest : TestBase
         await _mockCache.Received(1).GetOrCreateAsync<string>(
             expectedKey,
             Arg.Any<Func<ValueTask<Response<string>>>>(),
-            Arg.Is<CacheEntryOptions>(options => options.Tags.SequenceEqual(new[] { expectedTag })),
+            Arg.Is<CacheEntryOptions>(options => options.Tags.SequenceEqual(expectedTags)),
             Arg.Any<CancellationToken>());
     }
 

@@ -1,5 +1,6 @@
 using Axent.Abstractions.Caching;
 using Axent.Abstractions.Models;
+using Axent.Abstractions.Options;
 using Axent.Abstractions.Pipelines;
 using Axent.Abstractions.Requests;
 
@@ -55,14 +56,38 @@ internal sealed class CachePipe<TRequest, TResponse>(
                 : await next(request, cancellationToken);
         }
 
-        var entryOptions = keyResult.ScopeTags.Count is 0
-            ? request.CacheOptions
-            : request.CacheOptions with { Tags = [.. request.CacheOptions.Tags, .. keyResult.ScopeTags] };
+        var entryOptions = AddScopeTags(request.CacheOptions, keyResult.ScopeTags);
 
         return await cache.GetOrCreateAsync(
             keyResult.Key,
             () => next(request, cancellationToken),
             entryOptions,
             cancellationToken);
+    }
+
+    private static CacheEntryOptions AddScopeTags(
+        CacheEntryOptions options,
+        IReadOnlyList<string> scopeTags)
+    {
+        if (scopeTags.Count is 0)
+        {
+            return options;
+        }
+
+        var tags = new List<string>(
+            options.Tags.Count + scopeTags.Count + (options.Tags.Count * scopeTags.Count));
+
+        tags.AddRange(options.Tags);
+        tags.AddRange(scopeTags);
+
+        foreach (var scopeTag in scopeTags)
+        {
+            foreach (var tag in options.Tags)
+            {
+                tags.Add(CacheScopeTags.Combine(scopeTag, tag));
+            }
+        }
+
+        return options with { Tags = tags };
     }
 }

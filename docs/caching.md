@@ -151,6 +151,7 @@ builder.Services.AddAxent()
 
 Enable `EmitScopeTags` to add an implicit tag for every resolved scope dimension. These tags can
 invalidate all entries for one user or tenant without depending on the internal cache-key format.
+For every request-level tag, Axent also emits its intersection with each scope dimension.
 
 ```csharp
 builder.Services.AddAxent()
@@ -160,6 +161,33 @@ await cache.RemoveByTagsAsync(
     [CacheScopeTags.User(userId), CacheScopeTags.Tenant(tenantId)],
     cancellationToken);
 ```
+
+To remove only entries carrying a specific request-level tag for one user, tenant, or culture,
+use the scoped `RemoveByTagAsync` overload:
+
+```csharp
+[Axent]
+public sealed record GetMeQuery : ICacheableQuery<UserMeResponse>
+{
+    public CacheScope CacheScope => CacheScope.User;
+    public string CacheKey => nameof(GetMeQuery);
+    public bool BypassCache => false;
+    public CacheEntryOptions CacheOptions => new() { Tags = ["user-settings"] };
+}
+
+await cache.RemoveByTagAsync(
+    "user-settings",
+    CacheScope.User,
+    userId,
+    cancellationToken);
+```
+
+This removes the `user-settings` entries for `userId` while preserving other tags for that user
+and `user-settings` entries for other users. `RemoveByTagsAsync` uses union semantics, so passing
+the application tag and user scope tag separately would remove entries matching either tag.
+
+For explicit tag construction, use `CacheScopeTags.UserTag(userId, tag)`,
+`CacheScopeTags.TenantTag(tenantId, tag)`, or `CacheScopeTags.ForTag(...)`.
 
 Scope-tag emission is disabled by default because the in-memory provider retains one expiration
 token per distinct tag until that tag is removed.
@@ -230,9 +258,18 @@ public interface ICache
     ValueTask<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default);
     ValueTask SetAsync<T>(string key, T value, CacheEntryOptions? options = null, CancellationToken cancellationToken = default);
     ValueTask RemoveAsync(string key, CancellationToken cancellationToken = default);
+    ValueTask RemoveByTagAsync(string tag, CancellationToken cancellationToken = default);
+    ValueTask RemoveByTagAsync(
+        string tag,
+        CacheScope scope,
+        string discriminator,
+        CancellationToken cancellationToken = default);
     ValueTask RemoveByTagsAsync(IEnumerable<string> tags, CancellationToken cancellation = default);
 }
 ```
+
+`RemoveByTagAsync` has default interface implementations that delegate to `RemoveByTagsAsync`, so
+custom providers only need to implement `RemoveByTagsAsync` to support both overloads.
 
 Example skeleton
 
@@ -284,7 +321,7 @@ builder.Services.AddSingleton<ICache, CustomCache>();
 ## 🧼 Removing cache entries
 
 ### Single entry
-`ICache` exposes `RemoveAsync`, which allows cache invalidation fpr single entries.
+`ICache` exposes `RemoveAsync`, which allows cache invalidation for single entries.
 
 ```csharp
 await cache.RemoveAsync($"order:{orderId}", cancellationToken);
