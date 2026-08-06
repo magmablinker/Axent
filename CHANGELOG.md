@@ -1,5 +1,24 @@
 # Changelog
 
+## [4.0.1]
+
+### Features Added
+
+- Add user, tenant, and culture cache scopes with configurable unresolved-scope behavior and optional eviction tags.
+- Add dependency-injected cache key and cache scope providers.
+- Add claims-backed ASP.NET Core user and tenant cache scope providers.
+- Add cache-tag eviction restricted to one user, tenant, or culture discriminator.
+- Warn when an authorized cacheable query implicitly uses global scope.
+- Add redis implementation for ICache
+
+### Bugs Fixed
+
+- Ensure authorization runs before caching so cache hits cannot bypass authorization.
+
+### Breaking Changes
+
+- Refactor cache setup
+
 ## [4.0.0]
 
 ### Breaking Changes

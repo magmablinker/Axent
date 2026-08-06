@@ -8,6 +8,7 @@ internal sealed record RequestAuthorizationMetadata(
 
 internal static class AuthorizationMetadataCache<TRequest>
 {
+    // ReSharper disable once StaticMemberInGenericType
     public static readonly RequestAuthorizationMetadata Metadata = Create();
 
     private static RequestAuthorizationMetadata Create()

@@ -1,3 +1,4 @@
+using Axent.Abstractions.Caching;
 using Axent.Abstractions.Services;
 using Axent.Core.DependencyInjection;
 using Axent.Example.Application;
@@ -19,7 +20,12 @@ builder.Services.AddAxent(o => builder.Configuration.Bind("AppSettings:Axent", o
     .AddRequestHandlersFromAssembly(applicationAssembly)
     .AddTracing()
     .AddAutoFluentValidation()
-    .AddCache()
+    .AddCache(setup =>
+    {
+        setup.ConfigureOptions = options => options.EmitScopeTags = true;
+        setup.ConfigureCache = cache => cache.UseInMemory();
+    })
+    .AddHttpCacheScopes()
     .AddPipe<OtherQueryPipe>()
     .AddPipe(typeof(ExampleRequestPipe<,>));
 
@@ -27,7 +33,7 @@ var app = builder.Build();
 
 app.MapGet("/", async (IRequestSender<WelcomeRequest, string> sender, CancellationToken cancellationToken) =>
 {
-    var response = await sender.SendAsync(new WelcomeRequest(), cancellationToken);
+    var response = await sender.SendAsync(new(), cancellationToken);
     return response.ToResult();
 });
 
@@ -51,6 +57,20 @@ app.MapGet("/api/other", async (IRequestSender<OtherQuery, OtherResponse> sender
 
     var response = await sender.SendAsync(request, cancellationToken);
     return response.ToResult();
+});
+
+app.MapDelete("/api/other/cache/{cultureName}", async (
+    string cultureName,
+    ICache cache,
+    CancellationToken cancellationToken) =>
+{
+    await cache.RemoveByTagAsync(
+        "other-query",
+        CacheScope.Culture,
+        cultureName,
+        cancellationToken);
+
+    return Results.NoContent();
 });
 
 await app.RunAsync();

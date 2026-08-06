@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using Axent.Abstractions.Builders;
 using Axent.Abstractions.Models;
+using Axent.Abstractions.Options;
 using Axent.Abstractions.Services;
+using Axent.Extensions.Caching;
 using Axent.Tests.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,14 +17,17 @@ public sealed class AuthorizationPipeTests : TestBase
     private readonly IAuthorizationService _authorizationService = Substitute.For<IAuthorizationService>();
     private readonly IAuthorizationPolicyProvider _policyProvider = Substitute.For<IAuthorizationPolicyProvider>();
     private readonly IPrincipalAccessor _principalAccessor = Substitute.For<IPrincipalAccessor>();
+    private readonly ICache _cache = Substitute.For<ICache>();
 
     protected override void ConfigureAxent(IAxentBuilder builder)
     {
         builder.AddAuthorization();
+        builder.AddCache();
 
         builder.Services.AddScoped<IAuthorizationService>(_ => _authorizationService);
         builder.Services.AddScoped<IAuthorizationPolicyProvider>(_ => _policyProvider);
         builder.Services.AddScoped<IPrincipalAccessor>(_ => _principalAccessor);
+        builder.Services.AddSingleton<ICache>(_ => _cache);
     }
 
     [Fact]
@@ -85,5 +90,43 @@ public sealed class AuthorizationPipeTests : TestBase
 
         // Assert
         Assert.Equivalent(expected, result);
+    }
+
+    [Fact]
+    public async Task ProcessAsync_runs_authorization_before_cache()
+    {
+        // Arrange
+        var principal = new ClaimsPrincipal(new ClaimsIdentity());
+        _principalAccessor.Principal.Returns(principal);
+        _policyProvider.GetDefaultPolicyAsync()
+            .Returns(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+        _authorizationService.AuthorizeAsync(
+                principal,
+                Arg.Any<object>(),
+                Arg.Any<IEnumerable<IAuthorizationRequirement>>())
+            .Returns(AuthorizationResult.Failed());
+
+        _cache.GetOrCreateAsync<Unit>(
+                Arg.Any<string>(),
+                Arg.Any<Func<ValueTask<Response<Unit>>>>(),
+                Arg.Any<CacheEntryOptions>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Response.Success(Unit.Value));
+
+        await using var scope = ServiceProvider.CreateAsyncScope();
+        var sender = scope.ServiceProvider.GetRequiredService<ISender>();
+
+        // Act
+        var result = await sender.SendAsync(
+            new ProtectedCacheQuery(),
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        Assert.Equal(ErrorDefaults.Generic.Unauthorized(), result.Error);
+        await _cache.DidNotReceiveWithAnyArgs().GetOrCreateAsync<Unit>(
+            default!,
+            default!,
+            default,
+            TestContext.Current.CancellationToken);
     }
 }

@@ -22,6 +22,7 @@ internal sealed class {{ type.generated_type_name }}Sender
     public {{ type.generated_type_name }}Sender(
         IRequestHandler<{{ type.request_full_name }}, {{ type.response_full_name }}> handler,
         IEnumerable<IAxentPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>> pipes
+        , IAuthorizationPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>? authorizationPipe = null
         {{~ if type.is_command ~}}
         , ITransactionPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>? transactionPipe = null
         {{~ end ~}}
@@ -33,6 +34,11 @@ internal sealed class {{ type.generated_type_name }}Sender
         _handler = handler;
 
         var pipeline = new List<IAxentPipe<{{ type.request_full_name }}, {{ type.response_full_name }}>>();
+
+        if (authorizationPipe is not null)
+        {
+            pipeline.Add(authorizationPipe);
+        }
 
         {{~ if type.is_command ~}}
         if (transactionPipe is not null)

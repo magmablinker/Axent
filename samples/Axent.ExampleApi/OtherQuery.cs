@@ -1,4 +1,5 @@
 using Axent.Abstractions.Attributes;
+using Axent.Abstractions.Caching;
 using Axent.Abstractions.Models;
 using Axent.Abstractions.Options;
 using Axent.Abstractions.Pipelines;
@@ -13,7 +14,12 @@ internal sealed class OtherQuery : ICacheableQuery<OtherResponse>
     public required string Message { get; init; }
     public string CacheKey => $"{nameof(OtherQuery)}-{Message}";
     public bool BypassCache => false;
-    public CacheEntryOptions CacheOptions => new() { SlidingExpiration = TimeSpan.FromMinutes(5) };
+    public CacheScope CacheScope => CacheScope.Culture;
+    public CacheEntryOptions CacheOptions => new()
+    {
+        SlidingExpiration = TimeSpan.FromMinutes(5),
+        Tags = ["other-query"],
+    };
 }
 
 internal sealed class OtherResponse

@@ -431,6 +431,8 @@ dotnet_diagnostic.IDE0060.severity = suggestion
 dotnet_diagnostic.IDE0062.severity = suggestion
 # IDE0200: Lambda expression can be removed
 dotnet_diagnostic.IDE0200.severity = suggestion
+# IDE0290: Use primary constructor
+dotnet_diagnostic.IDE0290.severity = none;
 
 # CA2016: Forward the 'CancellationToken' parameter to methods that take one
 dotnet_diagnostic.CA2016.severity = suggestion

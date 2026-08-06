@@ -3,6 +3,8 @@ Axent supports request-level authorization by using the standard ASP.NET Core au
 This means you can protect requests with the familiar [Authorize] and [AllowAnonymous] attributes and reuse your existing policies, requirements, and handlers.
 
 Authorization is executed as part of the Axent pipeline before the request handler runs.
+It also runs before caching and transactions, regardless of extension registration order. This
+guarantees that a cached response cannot bypass the authorization gate.
 
 ## ✅ What it supports
 * [Authorize] on requests
@@ -146,5 +148,7 @@ Typical results are:
 * Authorization only applies to requests decorated with authorization attributes
 * [AllowAnonymous] always skips authorization for that request
 * Policies, roles, and custom handlers behave the same way as in ASP.NET Core
+* Authorized cacheable queries should declare `CacheScope.User`, `CacheScope.Tenant`, or another
+  appropriate scope. Generator warning `AXENT003` flags an implicit global scope.
 * This extension is a thin integration layer over the built-in ASP.NET Core authorization system
 * See the official ASP.NET Core authorization documentation for more details: [Authorization policies in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-8.0)

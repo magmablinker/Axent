@@ -1,0 +1,55 @@
+<Solution>
+  <Folder Name="/AxentBuilderExtensions/">
+    <Project Path="benchmarks/Axent.Benchmark/Axent.Benchmark.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/Axent.Example.Application/Axent.Example.Application.csproj" />
+    <Project Path="samples/Axent.ExampleApi/Axent.ExampleApi.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="CHANGELOG.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Solution Items/.github/" />
+  <Folder Name="/Solution Items/.github/workflows/">
+    <File Path=".github/workflows/main-analysis.yml" />
+    <File Path=".github/workflows/pr.yml" />
+    <File Path=".github/workflows/publish-nuget.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/docs/">
+    <File Path="docs/authorization.md" />
+    <File Path="docs/caching.md" />
+    <File Path="docs/configuration.md" />
+    <File Path="docs/fluent-validation.md" />
+    <File Path="docs/pipelines.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Axent.Abstractions/Axent.Abstractions.csproj" />
+    <Project Path="src/Axent.Core/Axent.Core.csproj" />
+    <Project Path="src/Axent.Extensions.AspNetCore/Axent.Extensions.AspNetCore.csproj" />
+    <Project Path="src/Axent.Extensions.Authorization/Axent.Extensions.Authorization.csproj" />
+    <Project Path="src/Axent.Extensions.Caching.Redis/Axent.Extensions.Caching.Redis.csproj" />
+    <Project Path="src/Axent.Extensions.Caching/Axent.Extensions.Caching.csproj" />
+    <Project Path="src/Axent.Extensions.FluentValidation/Axent.Extensions.FluentValidation.csproj" />
+    <Project Path="src/Axent.Generators/Axent.Generators.csproj" />
+    <Project Path="src/Axent.Templates.MinimalApi/Axent.Templates.MinimalApi.csproj" />
+    <Project Path="src/Axent.Templates/Axent.Templates.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/Directory.Build.props" />
+    <Project Path="tests/Axent.Core.UnitTests/Axent.Core.UnitTests.csproj" />
+    <Project Path="tests/Axent.Extensions.AspNetCore.UnitTests/Axent.Extensions.AspNetCore.UnitTests.csproj" />
+    <Project Path="tests/Axent.Extensions.Authorization.UnitTests/Axent.Extensions.Authorization.UnitTests.csproj" />
+    <Project Path="tests/Axent.Extensions.Caching.Redis.IntegrationTests/Axent.Extensions.Caching.Redis.IntegrationTests.csproj" />
+    <Project Path="tests/Axent.Extensions.Caching.Redis.UnitTests/Axent.Extensions.Caching.Redis.UnitTests.csproj" />
+    <Project Path="tests/Axent.Extensions.Caching.UnitTests/Axent.Extensions.Caching.UnitTests.csproj" />
+    <Project Path="tests/Axent.Extensions.FluentValidation.UnitTests/Axent.Extensions.FluentValidation.UnitTests.csproj" />
+    <Project Path="tests/Axent.Generators.UnitTests/Axent.Generators.UnitTests.csproj" />
+    <Project Path="tests/Axent.Tests.Shared/Axent.Tests.Shared.csproj" />
+  </Folder>
+</Solution>

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace Axent.Extensions.Authorization;
 
 internal sealed class AuthorizationPipe<TRequest, TResponse>
-    : IAxentPipe<TRequest, TResponse>
+    : IAuthorizationPipe<TRequest, TResponse>
 {
     private static readonly RequestAuthorizationMetadata _metadata = AuthorizationMetadataCache<TRequest>.Metadata;
 

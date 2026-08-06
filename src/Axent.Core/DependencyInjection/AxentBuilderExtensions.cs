@@ -1,6 +1,5 @@
 using System.Reflection;
 using Axent.Abstractions.Builders;
-using Axent.Abstractions.Pipelines;
 using Axent.Abstractions.Services;
 using Axent.Core.Attributes;
 using Axent.Core.Pipes.Observability;
@@ -110,21 +109,21 @@ public static class AxentBuilderExtensions
     }
 
     private static void RegisterGeneratedModules(
-        this IAxentBuilder builder,
+        this AxentBuilder builder,
         Assembly[] assemblies)
     {
-        foreach (var attribute in assemblies.SelectMany(a => a.GetCustomAttributes<AxentModuleAttribute>()))
+        foreach (var registrarType in assemblies.SelectMany(a => a.GetCustomAttributes<AxentModuleAttribute>()).Select(a => a.RegistrarType))
         {
-            if (!typeof(IAxentModuleRegistrar).IsAssignableFrom(attribute.RegistrarType))
+            if (!typeof(IAxentModuleRegistrar).IsAssignableFrom(registrarType))
             {
                 throw new InvalidOperationException(
-                    $"Axent registrar type '{attribute.RegistrarType.FullName}' does not implement '{typeof(IAxentModuleRegistrar).FullName}'.");
+                    $"Axent registrar type '{registrarType.FullName}' does not implement '{typeof(IAxentModuleRegistrar).FullName}'.");
             }
 
-            if (Activator.CreateInstance(attribute.RegistrarType) is not IAxentModuleRegistrar registrar)
+            if (Activator.CreateInstance(registrarType) is not IAxentModuleRegistrar registrar)
             {
                 throw new InvalidOperationException(
-                    $"Could not create Axent registrar '{attribute.RegistrarType.FullName}'.");
+                    $"Could not create Axent registrar '{registrarType.FullName}'.");
             }
 
             registrar.Register(builder.Services);

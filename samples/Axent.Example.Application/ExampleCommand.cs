@@ -19,7 +19,7 @@ public sealed class ExampleResponse
 
 internal sealed class ExampleCommandHandler : IRequestHandler<ExampleCommand, ExampleResponse>
 {
-    private static readonly Random Random = new();
+    private static readonly Random _random = new();
 
     private readonly ILogger<ExampleCommandHandler> _logger;
 
@@ -31,7 +31,7 @@ internal sealed class ExampleCommandHandler : IRequestHandler<ExampleCommand, Ex
     public ValueTask<Response<ExampleResponse>> HandleAsync(ExampleCommand request, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Message from request '{Message}'", request.Message);
-        return ValueTask.FromResult(Random.Next(1, 100) % 2 == 0
+        return ValueTask.FromResult(_random.Next(1, 100) % 2 == 0
             ? throw new InvalidOperationException()
             : Response.Success(new ExampleResponse { Message = request.Message }));
     }
