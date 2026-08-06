@@ -16,7 +16,7 @@
 * 🧩 Minimal: very little setup
 * 🧠 Strongly typed, extensible pipelines for cross-cutting concerns
 * 🌐 First class ASP.NET Core integration
-* ⚙️ Built for modern .NET (8+)
+* ⚙️ Built for modern .NET (10+)
 
 ## 📦 Features
 
@@ -93,7 +93,7 @@ app.MapGet("/api/example", async (IRequestSender<ExampleQuery, Unit> sender, Can
 });
 ```
 
-`ISender` is still available for dynamic dispatch, but it is a compatibility adapter over generated typed senders and is not the recommended hot path.
+`ISender` is still available for dynamic dispatch, but it is a compatibility adapter over generated typed senders and is not recommended for the hot path.
 ---
 
 Alternatively using the template
