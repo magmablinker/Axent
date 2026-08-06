@@ -31,29 +31,14 @@ internal static class TypeSymbolExtensions
             return symbol.OriginalDefinition.IsAxentAbstractionsInterface("ICacheableQuery`1");
         }
 
-        /// <summary>
-        /// Whether the type, or a base type, carries an attribute that behaves like
-        /// <c>[Authorize]</c>, and is not suppressed by <c>[AllowAnonymous]</c>.
-        /// </summary>
-        /// <remarks>
-        /// Detected structurally, by looking for the ASP.NET Core marker interfaces on the
-        /// attribute class, so the generator never needs to reference ASP.NET Core.
-        /// </remarks>
         public bool IsAuthorized()
         {
             var authorized = false;
 
             for (var current = symbol; current is not null; current = current.BaseType)
             {
-                foreach (var attribute in current.GetAttributes())
+                foreach (var attributeClass in current.GetAttributes().Select(attribute => attribute.AttributeClass).OfType<INamedTypeSymbol>())
                 {
-                    var attributeClass = attribute.AttributeClass;
-
-                    if (attributeClass is null)
-                    {
-                        continue;
-                    }
-
                     if (attributeClass.ImplementsAuthorizationMarker("IAllowAnonymous"))
                     {
                         return false;
@@ -69,39 +54,12 @@ internal static class TypeSymbolExtensions
             return authorized;
         }
 
-        /// <summary>
-        /// Whether the type, or a base type, declares its own <c>CacheScope</c> member. When it
-        /// does not, the default interface member is in effect and the entry is global.
-        /// </summary>
         public bool DeclaresCacheScope()
         {
             for (var current = symbol; current is not null; current = current.BaseType)
             {
-                foreach (var member in current.GetMembers())
-                {
-                    // Explicit interface implementations are named
-                    // 'Axent.Abstractions.Requests.ICacheableQuery<T>.CacheScope'.
-                    if (StringComparer.Ordinal.Equals(member.Name, "CacheScope")
-                        || member.Name.EndsWith(".CacheScope", StringComparison.Ordinal))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        private bool ImplementsAuthorizationMarker(string markerName)
-        {
-            if (symbol.IsAspNetCoreAuthorizationType(markerName))
-            {
-                return true;
-            }
-
-            foreach (var candidate in symbol.AllInterfaces)
-            {
-                if (candidate.IsAspNetCoreAuthorizationType(markerName))
+                if (current.GetMembers().Any(member => StringComparer.Ordinal.Equals(member.Name, "CacheScope")
+                                                       || member.Name.EndsWith(".CacheScope", StringComparison.Ordinal)))
                 {
                     return true;
                 }
@@ -110,13 +68,15 @@ internal static class TypeSymbolExtensions
             return false;
         }
 
-        private bool IsAspNetCoreAuthorizationType(string name)
-        {
-            return StringComparer.Ordinal.Equals(symbol.Name, name)
-                   && symbol.ContainingNamespace
-                       .ToDisplayString()
-                       .StartsWith("Microsoft.AspNetCore.Authorization", StringComparison.Ordinal);
-        }
+        private bool ImplementsAuthorizationMarker(string markerName) =>
+            symbol.IsAspNetCoreAuthorizationType(markerName) ||
+            symbol.AllInterfaces.Any(candidate => candidate.IsAspNetCoreAuthorizationType(markerName));
+
+        private bool IsAspNetCoreAuthorizationType(string name) =>
+            StringComparer.Ordinal.Equals(symbol.Name, name)
+            && symbol.ContainingNamespace
+                .ToDisplayString()
+                .StartsWith("Microsoft.AspNetCore.Authorization", StringComparison.Ordinal);
 
         private bool IsAxentAbstractionsInterface(string metadataName)
         {

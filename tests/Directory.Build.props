@@ -1,6 +1,7 @@
 <Project>
     <PropertyGroup>
-	<IsPackable>false</IsPackable>
+	    <IsPackable>false</IsPackable>
+      <SonarQubeExclude>true</SonarQubeExclude>
     </PropertyGroup>
 
     <ImportGroup>
