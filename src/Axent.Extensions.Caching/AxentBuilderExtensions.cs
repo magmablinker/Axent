@@ -10,14 +10,30 @@ public static class AxentBuilderExtensions
 {
     public static IAxentBuilder AddCache(
         this IAxentBuilder builder,
-        Action<AxentCachingOptions>? configure = null)
-    {
-        var options = new AxentCachingOptions();
-        configure?.Invoke(options);
+        Action<AxentCachingOptions>? configure = null) =>
+        builder.AddCache(setup =>
+        {
+            setup.ConfigureOptions = configure;
+            setup.ConfigureCache = cache => cache.UseInMemory();
+        });
 
-        builder.Services.AddMemoryCache();
+    public static IAxentBuilder AddCache(
+        this IAxentBuilder builder,
+        Action<AxentCacheSetup> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure);
+
+        var axentCacheSetup = new AxentCacheSetup();
+        configure(axentCacheSetup);
+
+        var options = new AxentCachingOptions();
+        axentCacheSetup.ConfigureOptions?.Invoke(options);
+
+        var cacheBuilder = new AxentCacheBuilder(builder);
+        axentCacheSetup.ConfigureCache ??= cache => cache.UseInMemory();
+        axentCacheSetup.ConfigureCache(cacheBuilder);
+
         builder.Services.AddSingleton(options);
-        builder.Services.TryAddSingleton<ICache, InMemoryCache>();
         builder.Services.TryAddScoped<ICacheKeyBuilder, CacheKeyBuilder>();
         builder.Services.TryAddEnumerable(
             ServiceDescriptor.Scoped<ICacheScopeProvider, CultureCacheScopeProvider>());

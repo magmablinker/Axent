@@ -20,7 +20,11 @@ builder.Services.AddAxent(o => builder.Configuration.Bind("AppSettings:Axent", o
     .AddRequestHandlersFromAssembly(applicationAssembly)
     .AddTracing()
     .AddAutoFluentValidation()
-    .AddCache(options => options.EmitScopeTags = true)
+    .AddCache(setup =>
+    {
+        setup.ConfigureOptions = options => options.EmitScopeTags = true;
+        setup.ConfigureCache = cache => cache.UseInMemory();
+    })
     .AddHttpCacheScopes()
     .AddPipe<OtherQueryPipe>()
     .AddPipe(typeof(ExampleRequestPipe<,>));

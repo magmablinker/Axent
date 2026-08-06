@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Axent.Extensions.Caching.Redis\Axent.Extensions.Caching.Redis.csproj" />
+  </ItemGroup>
+</Project>

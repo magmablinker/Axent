@@ -244,8 +244,28 @@ public sealed record SearchProductsQuery(string Term, bool ForceRefresh)
 ```
 This is useful when you want to force a fresh read without changing the general caching behavior.
 
+## Redis provider
+
+Reference `Axent.Extensions.Caching.Redis`, then select Redis while configuring caching:
+
+```csharp
+builder.Services.AddAxent()
+    .AddCache(setup =>
+    {
+        setup.ConfigureOptions = options => options.EmitScopeTags = true;
+        setup.ConfigureCache = cache => cache.UseRedis(options =>
+        {
+            options.ConnectionString = builder.Configuration.GetConnectionString("Redis")!;
+            options.InstanceName = "orders-api";
+        });
+    });
+```
+
+Redis provider supports absolute and sliding expiration, tag invalidation, and a distributed lock for
+`GetOrCreateAsync`. `InstanceName` isolates keys when applications share a Redis database.
+
 ## 🏗️ Implement a custom cache provider
-If you want to use Redis, a database, or any other storage, implement ICache.
+If you want to use a database or another storage provider, implement ICache.
 
 ```csharp
 public interface ICache
