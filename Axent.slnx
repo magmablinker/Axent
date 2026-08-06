@@ -1,5 +1,5 @@
 <Solution>
-  <Folder Name="/benchmarks/">
+  <Folder Name="/AxentBuilderExtensions/">
     <Project Path="benchmarks/Axent.Benchmark/Axent.Benchmark.csproj" />
   </Folder>
   <Folder Name="/samples/">

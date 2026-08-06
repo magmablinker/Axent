@@ -10,7 +10,9 @@ namespace Axent.Core.Services;
 internal sealed class Sender : ISender
 {
     private static readonly MethodInfo _sendCoreMethod =
+#pragma warning disable S3011
         typeof(Sender).GetMethod(nameof(SendCoreAsync), BindingFlags.NonPublic | BindingFlags.Static)
+#pragma warning restore S3011
         ?? throw new InvalidOperationException("Could not locate Axent sender dispatch method.");
 
     private readonly IServiceProvider _serviceProvider;
@@ -35,13 +37,8 @@ internal sealed class Sender : ISender
         where TRequest : IRequest<TResponse>
     {
         var sender = serviceProvider.GetService<IRequestSender<TRequest, TResponse>>();
-        if (sender is null)
-        {
-            throw new InvalidOperationException(
-                $"No pipeline registered for request type '{typeof(TRequest).FullName}'.");
-        }
-
-        return sender.SendAsync((TRequest)request, cancellationToken);
+        return sender?.SendAsync((TRequest)request, cancellationToken) ?? throw new InvalidOperationException(
+            $"No pipeline registered for request type '{typeof(TRequest).FullName}'.");
     }
 
     private delegate ValueTask<Response<TResponse>> SenderInvoker<TResponse>(
@@ -58,7 +55,7 @@ internal sealed class Sender : ISender
             return _invokers.GetOrAdd(requestType, static type =>
             {
                 var method = _sendCoreMethod.MakeGenericMethod(type, typeof(TResponse));
-                return (SenderInvoker<TResponse>)method.CreateDelegate(typeof(SenderInvoker<TResponse>));
+                return method.CreateDelegate<SenderInvoker<TResponse>>();
             });
         }
     }

@@ -1,7 +1,7 @@
 using Axent.Abstractions.Services;
 using Axent.Core.DependencyInjection;
 using Axent.Extensions.AspNetCore;
-using Axent.Templates.MinimalApi.UseCases.Welcome;
+using Axent.Templates.MinimalApi.UseCases.WeatherForecast;
 
 var builder = WebApplication.CreateBuilder(args);
 

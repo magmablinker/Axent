@@ -16,8 +16,8 @@ public sealed class Error : IEquatable<Error>
     {
         Identifier = identifier;
         StatusCode = statusCode;
-        Messages = messages.ToList();
-        ValidationErrors = new Dictionary<string, List<string>>();
+        Messages = [.. messages];
+        ValidationErrors = [];
         _hashCode = HashCode.Combine(identifier);
     }
 

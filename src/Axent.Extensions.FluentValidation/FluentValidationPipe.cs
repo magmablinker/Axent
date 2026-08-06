@@ -12,7 +12,7 @@ internal sealed class FluentValidationPipe<TRequest, TResponse> : IAxentPipe<TRe
 
     public FluentValidationPipe(IEnumerable<IValidator<TRequest>> validators, IFluentValidationErrorFactory errorFactory)
     {
-        _validators = validators.ToArray();
+        _validators = [.. validators];
         _errorFactory = errorFactory;
     }
 

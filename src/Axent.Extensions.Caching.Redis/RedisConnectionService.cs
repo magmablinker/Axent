@@ -58,11 +58,10 @@ internal sealed class RedisConnectionService : IRedisConnectionService
         var redisFields = fields.Select(static field => (RedisValue)field).ToArray();
         var values = await _database.HashGetAsync(key, redisFields).WaitAsync(cancellationToken);
 
-        return values
+        return [.. values
             .Select(static value => value.HasValue
                 ? long.Parse(value.ToString(), CultureInfo.InvariantCulture)
-                : 0L)
-            .ToArray();
+                : 0L)];
     }
 
     public async Task IncrementHashValuesAsync(

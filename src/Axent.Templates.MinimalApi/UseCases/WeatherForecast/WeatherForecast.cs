@@ -1,4 +1,4 @@
-namespace Axent.Templates.MinimalApi.UseCases.Welcome;
+namespace Axent.Templates.MinimalApi.UseCases.WeatherForecast;
 
 internal sealed class WeatherForecast
 {

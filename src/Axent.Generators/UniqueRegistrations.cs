@@ -8,11 +8,12 @@ internal sealed class UniqueRegistrations : IEquatable<UniqueRegistrations>
 
     public UniqueRegistrations(ImmutableArray<RequestRegistrationInfo> items)
     {
-        Items = items
-            .GroupBy(static r => r.RequestFullName, StringComparer.Ordinal)
-            .Select(static g => g.First())
-            .OrderBy(static r => r.RequestFullName, StringComparer.Ordinal)
-            .ToImmutableArray();
+        Items = [
+            ..items
+                .GroupBy(static r => r.RequestFullName, StringComparer.Ordinal)
+                .Select(static g => g.First())
+                .OrderBy(static r => r.RequestFullName, StringComparer.Ordinal)
+        ];
     }
 
     public bool Equals(UniqueRegistrations? other)

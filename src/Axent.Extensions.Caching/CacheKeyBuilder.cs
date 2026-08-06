@@ -27,7 +27,7 @@ internal sealed class CacheKeyBuilder : ICacheKeyBuilder
         AxentCachingOptions options,
         ILogger<CacheKeyBuilder>? logger = null)
     {
-        _providers = providers as ICacheScopeProvider[] ?? providers.ToArray();
+        _providers = providers as ICacheScopeProvider[] ?? [.. providers];
         _options = options;
         _logger = logger ?? NullLogger<CacheKeyBuilder>.Instance;
     }
